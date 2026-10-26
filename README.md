@@ -12,6 +12,28 @@ A browser-based save editor for **D2 Survivors**. Edit your save on desktop or m
   </a>
 </p>
 
+---
+
+<p align="center">
+  <a href="https://discord.gg/nENzQxTh4">
+    <img src="https://img.shields.io/badge/⚔️_JOIN_OUR_DISCORD-COMMUNITY-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Join the D2 Survivors Save Editor Discord Community">
+  </a>
+</p>
+
+<h2 align="center">💜 Join the Community!</h2>
+
+<p align="center">
+  <strong>More than just a save editor — be part of the community.</strong>
+  <br>
+  Connect with other players, share feedback, discuss the editor, report issues, and follow project updates.
+  <br><br>
+  <a href="https://discord.gg/nENzQxTh4">
+    <img src="https://img.shields.io/badge/💬_JOIN_THE_DISCORD-You're_Invited!-5865F2?style=for-the-badge" alt="Join Discord">
+  </a>
+</p>
+
+---
+
 ## 🌐 Open the Editor
 
 **[Launch D2 Survivors Save Editor →](https://justplguy.github.io/D2-Survivors-Save-Editor-Web/)**
@@ -66,6 +88,7 @@ The web editor uses HTML, CSS, and JavaScript, plus browser compression/decompre
 
 Created by **Just a Polish Guy**.
 
+- 💜 **Discord Community:** https://discord.gg/nENzQxTh4
 - 🌐 **Web Editor:** https://justplguy.github.io/D2-Survivors-Save-Editor-Web/
 - 💻 **Web Editor Repository:** https://github.com/justPLguy/D2-Survivors-Save-Editor-Web
 - 🖥️ **Windows Desktop Editor:** https://github.com/justPLguy/D2-Survivors-Save-Editor
