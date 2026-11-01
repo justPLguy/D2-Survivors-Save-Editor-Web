@@ -1,9 +1,11 @@
-# ⚔️ D2 Survivors Save Editor v10.4 — Web DEMO
+# ⚔️ D2 Survivors Save Editor v10.5 — Web DEMO
 
 A browser-based save editor for **D2 Survivors**. Load your save, change gold, see what Charsi's upgrades cost and check every item with the game's own rules. No installation needed: it runs in your browser.
 
+🌍 **Available in:** English · Polski · Deutsch · Français · 한국어 · 简体中文
+
 > ### 🆓 This is the DEMO — the full version is free on Discord
-> The web editor is **v10.4 Demo**. Gold & Charsi, items (view), stash, reference, save check and export work here.
+> The web editor is **v10.5 Demo**. Gold & Charsi, items (view), stash, reference, save check and export work here.
 > The Item Generator, Runewords, Charms, COPY ITEM, DESIGN, Skills and Belt editors are **previews**.
 >
 > **👉 Get the full version (free) on our Discord: https://discord.gg/nENzQxTh4**
@@ -54,7 +56,19 @@ Works with D2 Survivors **2026.1101.1**. The first visit downloads about 12 MB (
 | 💻 **EXE** | Standalone Windows application. | [EXE Repository](https://github.com/justPLguy/D2-Survivors-Save-Editor-EXE) |
 | 🐍 **Python** | Run the Python script directly. | [Python Repository](https://github.com/justPLguy/D2-Survivors-Save-Editor-PY) |
 
-## ✨ Features (v10.4)
+## 🆕 New in 10.5: Languages
+
+🇬🇧 English (default) · 🇵🇱 Polski · 🇩🇪 Deutsch · 🇫🇷 Français · 🇰🇷 한국어 · 🇨🇳 简体中文
+
+- Click the **globe and flag** in the top-right corner and pick your language.
+- The whole page switches **at once**, and the browser remembers your choice for the next visit.
+- Everything is translated: tabs, buttons, messages, Check save results, the update notice, the locked previews and the **HOW TO USE EDITOR** guide.
+- Item, stat, affix, skill and class names stay **exactly as the game shows them**, so you can still find everything in-game.
+- The language only changes what you see. Your save is handled the same way in every language.
+
+Native speaker who spots an odd line? Send a screenshot and a better wording on our [Discord](https://discord.gg/nENzQxTh4).
+
+## ✨ Features (v10.5)
 
 | Feature | Web Demo (here) | Full version (Discord) |
 |---|:---:|:---:|
@@ -66,6 +80,7 @@ Works with D2 Survivors **2026.1101.1**. The first visit downloads about 12 MB (
 | Reference: every unique, set item and runeword with its ranges | ✅ | ✅ |
 | Check save with the game's own rules (items + hero builds) | ✅ | ✅ |
 | **Update notice**: shows the newest stable version | ✅ | ✅ |
+| **Languages**: English, Polski, Deutsch, Français, 한국어, 简体中文 | ✅ | ✅ |
 | **Item Generator**: unique, set, rare, magic and white items made exactly like the game makes them | 👁️ preview | ✅ |
 | Rares with up to 6 chosen affixes | 👁️ preview | ✅ |
 | **Runewords** and **Charms** generators | 👁️ preview | ✅ |
@@ -75,7 +90,7 @@ Works with D2 Survivors **2026.1101.1**. The first visit downloads about 12 MB (
 
 ## 🧭 How to Use
 
-1. Open the [web editor](https://justplguy.github.io/D2-Survivors-Save-Editor-Web/) and wait until it says **Ready**.
+1. Open the [web editor](https://justplguy.github.io/D2-Survivors-Save-Editor-Web/) and wait until it says **Ready**. Pick your language with the globe in the top-right corner if you like.
 2. In the game open **SAVES** and copy your save code (it starts with `D2S1:`).
 3. Paste it into the editor and click **Load Save Code** (or **Paste Clipboard** / **Load from File…**).
 4. Pick your hero in the bar above the tabs.
@@ -90,6 +105,7 @@ Works with D2 Survivors **2026.1101.1**. The first visit downloads about 12 MB (
 - Your save is processed **in your browser**: it is not uploaded to load or edit it.
 - After every export the editor asks whether you want to share the save code with the editor's database to help improve the editor. **Nothing is sent unless you click Yes.**
 - The update notice only reads the newest version number from GitHub. Nothing is sent.
+- Your language choice is kept only in your own browser.
 
 ## ⚠️ Important: Leaderboards
 
@@ -97,7 +113,7 @@ Works with D2 Survivors **2026.1101.1**. The first visit downloads about 12 MB (
 
 ## 🛠️ Technology
 
-A static page on GitHub Pages: `index.html` plus `py.zip`, the editor's Python core (the same code and game tables as the Windows editor), run in the browser with [Pyodide](https://pyodide.org/). Both files must stay together in the repository; opening `index.html` straight from your disk will not work.
+A static page on GitHub Pages: `index.html` (the page and its translations) plus `py.zip`, the editor's Python core (the same code and game tables as the Windows editor), run in the browser with [Pyodide](https://pyodide.org/). Both files must stay together in the repository; opening `index.html` straight from your disk will not work.
 
 ## 👨‍💻 Developer & Socials
 
