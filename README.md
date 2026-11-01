@@ -1,6 +1,12 @@
-# ⚔️ D2 Survivors Save Editor v8.12 — Web
+# ⚔️ D2 Survivors Save Editor v10.4 — Web DEMO
 
-A browser-based save editor for **D2 Survivors**. Edit your save on desktop or mobile without installing a desktop application.
+A browser-based save editor for **D2 Survivors**. Load your save, change gold, see what Charsi's upgrades cost and check every item with the game's own rules. No installation needed: it runs in your browser.
+
+> ### 🆓 This is the DEMO — the full version is free on Discord
+> The web editor is **v10.4 Demo**. Gold & Charsi, items (view), stash, reference, save check and export work here.
+> The Item Generator, Runewords, Charms, COPY ITEM, DESIGN, Skills and Belt editors are **previews**.
+>
+> **👉 Get the full version (free) on our Discord: https://discord.gg/nENzQxTh4**
 
 <p align="center">
   <a href="https://justplguy.github.io/D2-Survivors-Save-Editor-Web/">
@@ -23,9 +29,9 @@ A browser-based save editor for **D2 Survivors**. Edit your save on desktop or m
 <h2 align="center">💜 Join the Community!</h2>
 
 <p align="center">
-  <strong>More than just a save editor — be part of the community.</strong>
+  <strong>The full editor is free on Discord — and so are updates, help and item requests.</strong>
   <br>
-  Connect with other players, share feedback, discuss the editor, report issues, and follow project updates.
+  Connect with other players, share feedback, report issues, and follow project updates.
   <br><br>
   <a href="https://discord.gg/nENzQxTh4">
     <img src="https://img.shields.io/badge/💬_JOIN_THE_DISCORD-You're_Invited!-5865F2?style=for-the-badge" alt="Join Discord">
@@ -38,60 +44,69 @@ A browser-based save editor for **D2 Survivors**. Edit your save on desktop or m
 
 **[Launch D2 Survivors Save Editor →](https://justplguy.github.io/D2-Survivors-Save-Editor-Web/)**
 
-## ✨ Features in v8.12
+Works with D2 Survivors **2026.1101.1**. The first visit downloads about 12 MB (the editor's Python engine); after that your browser keeps it.
 
-- 💰 **Gold Editor** — change your character's gold.
-- 🛡️ **Equipment Editor** — browse equipped items and inventory.
-- ⚔️ **Item Modifiers** — edit supported item modifier values.
-- 🧙 **Character Classes** — browse available character classes.
-- 🏹 **Mercenary Equipment** — inspect and edit supported mercenary items.
-- 🔮 **Skills & Passives** — search, filter, and stage supported skill-level changes.
-- 🧪 **Belt & Potions** — edit four existing belt slots; choose Potion or Rejuvenation and set each quantity from 0 to 3.
-- 🔍 **Change Preview** — review changes before exporting.
-- 💾 **Save Export** — generate a modified save code and download it as a file.
-- 📱 **Responsive Interface** — use the editor on desktop and mobile browsers.
-- 🔒 **Local Processing** — save data is processed in your browser; the editor does not require uploading your save to a backend server.
+## 🚀 Choose Your Version
 
-Feature availability depends on the structure of the loaded save. The editor does not automatically create missing belt data.
+| Version | Description | Repository |
+|---|---|---|
+| 🌐 **Web** | Runs in your browser, nothing to install. | [Web Repository](https://github.com/justPLguy/D2-Survivors-Save-Editor-Web) |
+| 💻 **EXE** | Standalone Windows application. | [EXE Repository](https://github.com/justPLguy/D2-Survivors-Save-Editor-EXE) |
+| 🐍 **Python** | Run the Python script directly. | [Python Repository](https://github.com/justPLguy/D2-Survivors-Save-Editor-PY) |
 
-## 🚀 How to Use
+## ✨ Features (v10.4)
 
-1. Open the [web editor](https://justplguy.github.io/D2-Survivors-Save-Editor-Web/).
-2. Paste a save code beginning with `D2S1:` and click **Load Save Code**, or use **Load from File…**.
-3. Select the character class you want to edit.
-4. Use the tabs to edit gold, equipment, item modifiers, skills, or belt contents.
-5. For potions, open **Belt & Potions**. For each of the four slots, choose **Potion** or **Rejuvenation** and set the quantity from **0 to 3**. Set quantity to **0** to empty a slot.
-6. Click **Apply Belt Changes** and confirm the summary. Belt changes are held in the editor until you generate the updated save.
-7. Open **Preview & Export** and click **Preview Changes** to review the edits.
-8. Click **Generate Save Code**, then copy the result or save it to a file.
-9. Load the edited save into the game using the game's supported import method and verify the result.
+| Feature | Web Demo (here) | Full version (Discord) |
+|---|:---:|:---:|
+| Load / export save codes (paste, .txt file or the game's `save.json`) | ✅ | ✅ |
+| **Gold & Charsi**: gold editing, every Charsi upgrade with gold spent, next price and gold to max, "how much gold for…" calculator | ✅ | ✅ |
+| Character & Mercenary: level, skills, mercenary | ✅ | ✅ |
+| Items & Modifiers: tooltips like in the game, every stat with its range, **LEGIT / NOT LEGIT** status | 👁️ view | ✅ edit |
+| Stash: shared, personal and uniques tabs | ✅ | ✅ |
+| Reference: every unique, set item and runeword with its ranges | ✅ | ✅ |
+| Check save with the game's own rules (items + hero builds) | ✅ | ✅ |
+| **Update notice**: shows the newest stable version | ✅ | ✅ |
+| **Item Generator**: unique, set, rare, magic and white items made exactly like the game makes them | 👁️ preview | ✅ |
+| Rares with up to 6 chosen affixes | 👁️ preview | ✅ |
+| **Runewords** and **Charms** generators | 👁️ preview | ✅ |
+| **COPY ITEM** (exact copy or a new roll) and **DESIGN** (ring, amulet and charm pictures) | 👁️ preview | ✅ |
+| Re-roll items to the values you want (stays legit) | 👁️ preview | ✅ |
+| **Skills** editor, **Belt & Potions** editor | 👁️ preview | ✅ |
 
-### 🧪 Potion Editing Notes
+## 🧭 How to Use
 
-- Select a character class before opening the belt editor.
-- The editor needs compatible belt data already present in the save. It will not create a missing belt automatically.
-- Each of the four visible slots supports `potion` or `rejuvenation` with a quantity from 0 to 3.
-- If the save contains an unexpected belt structure, editing is disabled for safety.
-- The game may enforce its own stack limits. Always inspect the result in-game.
+1. Open the [web editor](https://justplguy.github.io/D2-Survivors-Save-Editor-Web/) and wait until it says **Ready**.
+2. In the game open **SAVES** and copy your save code (it starts with `D2S1:`).
+3. Paste it into the editor and click **Load Save Code** (or **Paste Clipboard** / **Load from File…**).
+4. Pick your hero in the bar above the tabs.
+5. Change your gold in **Gold & Charsi**, look through **Items & Modifiers**, **Stash** and **Reference**, or run **Check save**.
+6. Open **Preview & Export**, check the change list and click **Generate Save Code**.
+7. Click **Copy Code**, then paste the new code into the game's **SAVES** menu.
+
+**Always keep a copy of your original save code before making changes.** Not sure where to start? Open the red **HOW TO USE EDITOR** tab inside the editor.
+
+## 🔒 Your Data
+
+- Your save is processed **in your browser**: it is not uploaded to load or edit it.
+- After every export the editor asks whether you want to share the save code with the editor's database to help improve the editor. **Nothing is sent unless you click Yes.**
+- The update notice only reads the newest version number from GitHub. Nothing is sent.
 
 ## ⚠️ Important: Leaderboards
 
-**Editing a save may flag your character. Runs made with an edited character will not count toward leaderboards.** Use the editor at your own discretion. If leaderboard participation matters to you, keep a separate unmodified character/save.
-
-Always keep an untouched backup of your original save. Test edits on a copy first, especially after modifying skills or belt contents. Incorrect or unsupported changes may cause unexpected results or prevent a save from loading correctly.
+**The editor is made for offline fun, not for the ladder.** The game marks edited saves, and runs made with an edited character do not count toward leaderboards. If the leaderboard matters to you, keep a separate untouched save.
 
 ## 🛠️ Technology
 
-The web editor uses HTML, CSS, and JavaScript, plus browser compression/decompression APIs for the `D2S1:` save format. It is designed to run as a static website through GitHub Pages.
+A static page on GitHub Pages: `index.html` plus `py.zip`, the editor's Python core (the same code and game tables as the Windows editor), run in the browser with [Pyodide](https://pyodide.org/). Both files must stay together in the repository; opening `index.html` straight from your disk will not work.
 
 ## 👨‍💻 Developer & Socials
 
 Created by **Just a Polish Guy**.
 
-- 💜 **Discord Community:** https://discord.gg/nENzQxTh4
+- 💜 **Discord Community (full version):** https://discord.gg/nENzQxTh4
 - 🌐 **Web Editor:** https://justplguy.github.io/D2-Survivors-Save-Editor-Web/
-- 💻 **Web Editor Repository:** https://github.com/justPLguy/D2-Survivors-Save-Editor-Web
-- 🖥️ **Windows Desktop Editor:** https://github.com/justPLguy/D2-Survivors-Save-Editor
+- 💻 **Windows EXE Editor:** https://github.com/justPLguy/D2-Survivors-Save-Editor-EXE
+- 🐍 **Python Editor:** https://github.com/justPLguy/D2-Survivors-Save-Editor-PY
 - ▶️ **YouTube:** https://www.youtube.com/@justPLguy
 - 📘 **Facebook:** https://www.facebook.com/justPLguy/
 - 🧑‍💻 **GitHub Profile:** https://github.com/justPLguy
