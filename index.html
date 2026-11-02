@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>D2 Survivors Save Editor v10.8 — Web DEMO</title>
+<title>D2 Survivors Save Editor v10.9 — Web DEMO</title>
 <meta name="description" content="D2 Survivors Save Editor in your browser: load your save, change gold, see Charsi's prices, check every item with the game's own rules. The full version is free on Discord.">
 <style>
 :root{color-scheme:dark;--bg:#151515;--panel:#211f1d;--panel2:#1a1918;--line:#4a4339;--text:#eee;--muted:#b3ab9f;--gold:#e0b85b;--purple:#a88be0;--green:#7fd492;--red:#ef8a8a;--orange:#e6a04a;
@@ -80,7 +80,7 @@ button.lock:before{content:"🔒 "}
 .tip .t1{font-size:18px}
 .tip .t2{color:#cfcfcf;margin-bottom:8px}
 .tip .l{line-height:1.6}
-.tip .stat{color:var(--blue)}.tip .bonus{color:var(--set)}.tip .defense,.tip .implicit{color:#fff}
+.tip .stat{color:var(--blue)}.tip .bonus{color:var(--set)}.tip .defense,.tip .implicit,.tip .damage,.tip .base{color:#fff}
 .verdict{margin:10px 0;padding:8px 10px;border-radius:5px;font-weight:700}
 .verdict.ok{background:#16301f;color:var(--green)}.verdict.bad{background:#3a1717;color:var(--red)}
 table{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -128,7 +128,7 @@ footer{text-align:center;color:#999;font-size:12px;padding:22px 12px 18px;border
 <header>
   <div class="hrow">
     <div>
-      <h1>D2 Survivors Save Editor v10.8 — Web DEMO</h1>
+      <h1>D2 Survivors Save Editor v10.9 — Web DEMO</h1>
       <p data-t>Load a save, change gold, see Charsi's prices and check every item with the game's own rules, then export.</p>
     </div>
     <div class="topright">
@@ -1774,10 +1774,31 @@ const I18N = {
 <script>
 "use strict";
 const ICONS = {"en": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAD5UlEQVR4XrVUbUxbZRR+7ntvS1lb6NjcTBaJUJjDr+BSXWSIynQwlyzBDxaZDQONbGXBfcQBQT7m3ELUBIhumkgMCWokBtzUkEkUFZhWMNAhg9XBAJchAqVAWy4fvfeY+1a2LNOfO8m5OTnnfd/nOc85uQKALNxmy7pWUE4Xtu0h5Y8h6rwyRQ/vOE6ItJNodRBbn0s/9Y/RxNET1CbEcNdiLcfW5ZAuPp9gsdPGpGL6tnuUaHyC+jLyaNh+kDTyTCM/XXgICUWvwrW7ADFNjXA2v4E3K+0Ql5ah+mQwJtzSo5ZT5SUsz8koOLwLPedP4tGLXfjt6WzEZKaD1ZzkdzjAluQinJrS4aG2BsiDI+h/6iWUpm2Es6MSiTYr5IUgmHADRHtcy8XErsf3LcdQk5+Kq8/vx8TXrbC11qNpbTxsycXXSWVhTTZBeJZs6cep0z1Ofzd8Q10PpJOnqpb8k17yzARoJL+UOkQr99EDZTTu8dHk2BT5P2mkzvvS6NrpehoY9dD2PTUE9hxhtZ1LJGkwbe2VECWG2Wk/tOy6zJ3cvT86YYyKgJExzEgiBNKqQFBkiI4yATBhJvoubHY2QTStgueqFwWOZ1BWthuqSkhJqAcH2FT3MUDEQZaXFQxpuofpwUxGTH/RzGv+X3vAwg0cwNfehSFHKSejs0TA23QOqryAtUYDNoTpoAQV4F9FOcCld2qv6yUIQkhvIhCpEJgYGpYhDIJex2PZPYzAhUs8JlXldyAIUPmdUJcrxod8k63U+VBDQP9rK7WVBfiPoyGJXn+FP8REBlIJcz6ZM5FWR/LW1cUlLpHGXLPwe2Jh2pIIQafj2iveWX7ebA6HJDIoiso7wtslIYCBvTmQJBF+nwyJCUhNjOYPzTpdCLvzDhju3oDhg8cQcA3wvDnZhtiacgSnvPD3X4Yl5RGe/3lgDHP+RURYjFCCKgfgEj3+RAm2JjiQu7ca/sACAoN/ondnLqara8GUIObnF4Gl5RArbUbBIGZ9MpbmZQQavkLPY5nwdV+EohKOHK7F1k0OpKQUhWbHvwLwWsWLuNxbhdSRPrhfcCDOvgv6D99FRsVZ/DI4CXOEEYqqcjebV6Fr2INt++owV1qI+8sPYCivGPe2NKOv/QTeOr0PeoP+BkDLuQpUO57ESEYe/jrzHTa31KExKg6JyUVobuiAXi/dtB3athj0Epw/9MKWdBTvTUh4sPUzBNxX8HtqFkq2x+N8eyUH4DNIcrvQ/fJHsB7KgXdHGjJKPsWZz9sBiwniGvMtq6eZBsIijVgQGI7s/wBnv0zE+1WFiOtzoTuzANbsjBVxbu/v+h9g/sJXrDbnmwAAAABJRU5ErkJggg==", "pl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAAXElEQVR4XmNkYGCIYqAhYAGZ/f///6W0sIORkTGaiRYGI4OhbwE4Dhj+/6dZSEEsYGSkrQX/PnymrQUPTcNpa8HfNx9oawEjKyQqaAFonoqGfkajuQ9AOYymxTUAAYIQEg3nJFIAAAAASUVORK5CYII=", "de": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAAb0lEQVR4XmNkYGCIYqAhYIGavZRGdkQz0chgOAD7gFa2/GNggFgAYtAKgC1YQiPTY2A+cKWRBSAA9sFHWlvAwkwjG/5CffD3L40sgAURvy+NLNgM9YFoP40t+P+eRhbAgoiRVpFMw1ICDhhpXVwDAAOFDXXzUB7cAAAAAElFTkSuQmCC", "fr": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAAaUlEQVR4XmNkYGCIYqAhYAGbHbpkKbIdjIwMDP///GMQ5ONguDvFn0GQm43h/38GsDgYQDn/P39i+BQTxPD/wzsGBhZWiDgSENx/OpqJho4Hg1ELCILRICIIRoOIIBgNIoIAVD7StLgGACecFtUzhasVAAAAAElFTkSuQmCC", "ko": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAADR0lEQVR4XrVUXUxTZxh+jiUx1NGEZCQmzRBFSmdJbZeoBTShIw0Xxt0uAXVNzOCiCxd6MbK7XeiVYfPCmBDCFhOjBq6MhAGxWOiybEDKT8EMERqHIQaQYHvoqOd8j/k+PFUnmt34Juec75zzvs/z/bzPowFoxEeORpIUQsgHZ2dn1VOGaZr5sQqZ8ypvpxyr1sKyJt9oAQ0PD9Pr9XJhYYGpVOoV5jaoeJNMjk0zDyRzFxcX6ff7OTQ0pOoMw3ibIJfL0e12MxqNsqGhgT09PYzH4zQN4/VsdZ1GOv363TA4MjLC7u5u1tfXc3Jykm1tbdR1Xa1erkCTN5I3mpub4XQ6Ybfbsbq6CofDgempKdy6fRvZx/9g+edryCSmACFQ6HZhb2sLijyf43RTE7w+H56traGkpATZbBapVAqdnZ3QNK1JHq/aooGBAfb19bG2tpaxWIyugxXMpDPMPPibiZoQ/yz1cOzQMf7lCXCszMOxw8e5MTXDjJ7hhfPnOTo6ykAgwN7eXoVlrUARWIcyPT3NRCLBmppq9vf9prZiLnKBf3zm4fiRIMcO1/KB9yjjR0Ic31/Fh1+fVTnRe1FWV1er2mQymT87iV0gGTRNg2maqKqqUg3b1fULKisrsfwvEX+URt0eGzZyW7CLHC46TuDuHg/KPlnDpUf3UfZkCcEvg/i1qwsut1vVSyybzabGiuB9USAELtuPwix8Cg/X0Vnkx3XHMUBs4VnhAfzETTQYWx9U0S75l6RiTCaTmJiYQDgcRn//AErsNnzqKsW39lM46fwGVx01sIksdhcAu/TnMPaVAfvKce9+DGfDYVU7MzOjsCSmjDzB4OAglpaW0Nraivb2dkQi30HXN3HlnB/2ogKsPyc05mBCw1bmBQQFfogEkc1u4u6dO+jo6EAkElEdJLEsgnybtrS0oLi4GHV1dVhZWcHc3Bwezs/j1s2b+H32Kb6/NorxhXUIEoecDvx47gt8FSjF6TNn4KqoQHl5uWrTWCym6iXhW21qCU0qMRQK5YX24g2hLS6nOf9kIy80+c8SWjAY3FFoeR3IeJ9VmKb4rwXRUN+2/cuyCp/Pt7NV/F+zM4VQ1zbsu4a4k9mpM/iYbv0S+6kqEdecuSUAAAAASUVORK5CYII=", "zh": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAABUklEQVR4Xu2UT0rDQBTGfzOT2LS1NhXFrQguPIQrQRfeoF7CE7j1DC5EENx4hS5F8ACCK7sWxVZbozVpZmReEBEV20p3fquE8N73531EAU2miMDvbq/FJ1jQsw4M2J7CJoq4OUAFcH9QJli0Y8tYuXrY0X5KhZD3FdX1jNpGSt5TmLojOQtJzkPmtl/RFYcXMS7EgQodC7sv1DYzmdcNy+NpRHZj0GVHbSslbRshVgZwo9OIg7yreWqVMLHF1K085x2NrjpZ1jmKGN5piWuc5R7iwA+ZecvtfgWXKUzD4qW6ZwWBY2kvoXsckV4bVGk8kiKiyDG4DOSwKDBeuXKUVnOJqHNYJu8oudVkDiQnikj8DgtuqJhZzuU9uQgxsScdPft3FBGJDT61xLem35qRT6YxWYM+bvAdvOBi/0T1/OrgB5K/Qmo6TfwT/Apfzqn+rt8AfdNsuyqw+goAAAAASUVORK5CYII=", "globe": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAADCElEQVR4Xq2U3WsUVxjGn+ec2Z1M1oRGYhJUNIvSRNCq4IUtoqaSJoIfII1QTfDKXPtV6EX7H4h4rVdbE4q7KKgXpgYMSOlVoYpaU1Q2bsWqGJOo2c3Mzpy3vBtqrYg3emAu5uX3ezjnPe8M8MYS6bNvvr9vvc3yXfDDsQPr4Fy3E9ksCZYLAGPxwJDXYMzo0q7c9be9WpAI+OjSYBAH5a89Yw41ZtLrEydwIqjGDsYQ1hCGhLXEi1fR77FzJ6cczq39aqhMQjzJ63EKztWFny0IUrkF9Sk8ejJ7GgY+wG5CbhhyowisAAUBkiWLMgdnXkU5G8Y3AVzP5/us0R1pYjmMNvhpiyfPKsey24cHSXYRyDugmDh5KoLzgHyZ7RkafPysfCyos6hUki/U7dMMDSqOHWhrsCyVw+Tysu4zu4sj33Q2N2XuTE7PbRORfSC2WthvGxtS56dexKuyvbnx0ujAhXrfbn+ZyLJsV+7x/I7CpN/3vVQljL67le9LG+EaApIY3iORoiBFi/vaTmPcGmWUVUddzagFCWX308nK7Y4dZ++s3luIxJiWShhzRfeZEmmqILl02483tSYiLcooq466tc3UjjbS/6eftpmwGv/C+dJaEp1OcBYinxNoocElEWo7xgHcEAj8lLcpjJLZbO9Qh1ebB6JqDRcR2AoRCthQq4t0kWgUIA2HLTpPAJYTslCbbA2bQEy/PhqA57OV6kR7z3Bbe+9wq6F8nwk8tPdEiwkWIPhbfK+jzrdwcD8oo6w66r4OouBic1Pdp3dH+leKCA3NROB7Uhq1rTqXJGMmZrHWLMyEMsqqo+5/zfbtUBQlVd/wBEmJXfyHAKzGdhUgsehTjTu1CSnY28ooq466tSCdbJ2DyZnwyMJP/J2lKwNHs70/jU/OzP3lWe4UIoIgIWXX9Mu5iSU6Q1cGjio7NR0dVlcz5q9fwHo//VsYJWhtDo4XL+8/JSJjAuw1QNYatpDYA/Bq8ef+U23N9ccrcwmCwP6qbuHf6/8YH+1H+438b33Ij+0fBW6mAUJs39AAAAAASUVORK5CYII="};
-const APP_VERSION = "10.8 Demo";
-const EDITOR_TAG = "10.8 Web Demo";               // what the database sees as editor_version
+// v10.9 texts
+Object.assign(I18N.pl, {"Base Defense: {0} (base {1})": "Bazowa obrona: {0} (baza {1})", "Base Defense: {0} (base {1} (ethereal: x1.5))": "Bazowa obrona: {0} (baza {1} (eteryczny: x1,5))",
+  "{0} Korean game texts read from {1}": "Wczytano {0} koreańskich tekstów gry z {1}",
+  "No Korean texts in that file. Pick D2 Survivors' resources\\app.asar.": "W tym pliku nie ma tekstów koreańskich. Wybierz resources\\app.asar z D2 Survivors.",
+  "Item names and stat lines can be shown in Korean like D2 Survivors shows them: click the globe and pick D2 Survivors' resources\\app.asar (it stays in this browser).": "Nazwy przedmiotów i linie statystyk mogą być po koreańsku, tak jak w D2 Survivors: kliknij globus i wybierz resources\\app.asar z D2 Survivors (zostaje w tej przeglądarce)."});
+Object.assign(I18N.de, {"Base Defense: {0} (base {1})": "Basisverteidigung: {0} (Basis {1})", "Base Defense: {0} (base {1} (ethereal: x1.5))": "Basisverteidigung: {0} (Basis {1} (ätherisch: x1,5))",
+  "{0} Korean game texts read from {1}": "{0} koreanische Spieltexte gelesen aus {1}",
+  "No Korean texts in that file. Pick D2 Survivors' resources\\app.asar.": "In dieser Datei sind keine koreanischen Texte. Wähle resources\\app.asar von D2 Survivors.",
+  "Item names and stat lines can be shown in Korean like D2 Survivors shows them: click the globe and pick D2 Survivors' resources\\app.asar (it stays in this browser).": "Gegenstandsnamen und Werte können auf Koreanisch erscheinen, wie D2 Survivors sie zeigt: klicke auf den Globus und wähle resources\\app.asar von D2 Survivors (bleibt in diesem Browser)."});
+Object.assign(I18N.fr, {"Base Defense: {0} (base {1})": "Défense de base : {0} (base {1})", "Base Defense: {0} (base {1} (ethereal: x1.5))": "Défense de base : {0} (base {1} (éthéré : x1,5))",
+  "{0} Korean game texts read from {1}": "{0} textes du jeu en coréen lus depuis {1}",
+  "No Korean texts in that file. Pick D2 Survivors' resources\\app.asar.": "Aucun texte coréen dans ce fichier. Choisissez resources\\app.asar de D2 Survivors.",
+  "Item names and stat lines can be shown in Korean like D2 Survivors shows them: click the globe and pick D2 Survivors' resources\\app.asar (it stays in this browser).": "Les noms d'objets et les lignes de stats peuvent s'afficher en coréen comme dans D2 Survivors : cliquez sur le globe et choisissez resources\\app.asar de D2 Survivors (il reste dans ce navigateur)."});
+Object.assign(I18N.ko, {"Base Defense: {0} (base {1})": "기본 방어력: {0} (기본 {1})", "Base Defense: {0} (base {1} (ethereal: x1.5))": "기본 방어력: {0} (기본 {1} (에테리얼: x1.5))",
+  "{0} Korean game texts read from {1}": "{1}에서 한국어 게임 텍스트 {0}개를 읽었습니다",
+  "No Korean texts in that file. Pick D2 Survivors' resources\\app.asar.": "이 파일에는 한국어 텍스트가 없습니다. D2 Survivors의 resources\\app.asar를 고르세요.",
+  "Item names and stat lines can be shown in Korean like D2 Survivors shows them: click the globe and pick D2 Survivors' resources\\app.asar (it stays in this browser).": "아이템 이름과 능력치 줄을 D2 Survivors처럼 한국어로 표시할 수 있습니다: 지구본을 눌러 D2 Survivors의 resources\\app.asar를 고르세요 (이 브라우저에만 남습니다)."});
+Object.assign(I18N.zh, {"Base Defense: {0} (base {1})": "基础防御：{0}（基础 {1}）", "Base Defense: {0} (base {1} (ethereal: x1.5))": "基础防御：{0}（基础 {1}（虚无：x1.5））",
+  "{0} Korean game texts read from {1}": "已从 {1} 读取 {0} 条韩语游戏文本",
+  "No Korean texts in that file. Pick D2 Survivors' resources\\app.asar.": "该文件中没有韩语文本。请选择 D2 Survivors 的 resources\\app.asar。",
+  "Item names and stat lines can be shown in Korean like D2 Survivors shows them: click the globe and pick D2 Survivors' resources\\app.asar (it stays in this browser).": "物品名称和属性行可以像 D2 Survivors 那样以韩语显示：点击地球图标并选择 D2 Survivors 的 resources\\app.asar（只保存在此浏览器中）。"});
+const APP_VERSION = "10.9 Demo";
+const EDITOR_TAG = "10.9 Web Demo";               // what the database sees as editor_version
 const DISCORD = "https://discord.gg/nENzQxTh4";
-const PY_ZIP = "py.zip?v=10.8";
+const PY_ZIP = "py.zip?v=10.9";
 const VERSION_API = "https://api.github.com/repos/justPLguy/D2-Survivors-Save-Editor-EXE/contents/version.json";
 const VERSION_RAW = "https://raw.githubusercontent.com/justPLguy/D2-Survivors-Save-Editor-EXE/HEAD/version.json";
 const SUPABASE_FN = "https://vsiidrluknnklxfwgqro.supabase.co/functions/v1/dynamic-endpoint";
@@ -1830,6 +1851,30 @@ function T(text){
   return r == null ? text : m[1] + r + m[3];
 }
 const TF = (s, ...v) => T(s).replace(PH, (g, n) => v[n] ?? g);       // T("Gold: {0}") then fill the numbers
+// v10.9: 한국어 game texts from the player's own D2 Survivors (resources\app.asar). Read in this browser only.
+let GAME = false; const GCACHE = new Map();
+function G(text){
+  if (!GAME || LANG !== "ko" || !api || typeof text !== "string" || !text) return text;
+  let r = GCACHE.get(text); if (r === undefined){ try{ r = api.game_text(text); }catch(e){ r = text; } GCACHE.set(text, r); }
+  return r;
+}
+function gameSync(){ GCACHE.clear(); if (api && GAME) { try{ api.game_lang(LANG === "ko"); }catch(e){} } }
+async function pickGameTexts(file){
+  if (!api) return;
+  const buf = new Uint8Array(await file.arrayBuffer());
+  const r = JSON.parse(api.game_texts(buf));
+  if (!r.ok){ say("No Korean texts in that file. Pick D2 Survivors' resources\\app.asar.", true); return; }
+  GAME = true;
+  try{ localStorage.setItem("d2s_ko_game", api.game_texts_js()); }catch(e){}
+  if (LANG !== "ko") setLang("ko"); else { gameSync(); redraw(); }
+  say(() => TF("{0} Korean game texts read from {1}", r.count, file.name));
+}
+function restoreGameTexts(){
+  let js = null; try{ js = localStorage.getItem("d2s_ko_game"); }catch(e){}
+  if (!js || !api) return;
+  try{ GAME = JSON.parse(api.game_texts(js)).ok; }catch(e){ GAME = false; }
+  gameSync();
+}
 const STATIC = new Map();
 function applyStatic(){
   document.querySelectorAll("[data-t],[data-th],[data-tp]").forEach(el => {
@@ -1845,18 +1890,24 @@ function langPicker(){
   const box = $("lang"), cur = LANGS.find(l => l[0] === LANG) || LANGS[0];
   box.innerHTML = `<img class="globe" src="${ICONS.globe}" alt="">` +
     `<button id="langBtn" aria-haspopup="true"><img class="flag" src="${ICONS[cur[0]]}" alt=""> ${cur[1]} ▾</button>` +
-    `<ul id="langList" class="hidden">${LANGS.map(([c, n]) => `<li><button data-l="${c}" class="${c===LANG?"cur":""}"><img class="flag" src="${ICONS[c]}" alt=""> ${n}</button></li>`).join("")}</ul>`;
+    `<ul id="langList" class="hidden">${LANGS.map(([c, n]) => `<li><button data-l="${c}" class="${c===LANG?"cur":""}"><img class="flag" src="${ICONS[c]}" alt=""> ${n}</button></li>`).join("")}` +
+    `<li><button id="gameTextsBtn" title="D2 Survivors\\resources\\app.asar">D2 Survivors app.asar · 게임 텍스트 (한국어)…</button></li></ul>` +
+    `<input type="file" id="gameTextsFile" accept=".asar,.js" class="hidden">`;
   const list = $("langList");
   const toggle = e => { e.stopPropagation(); list.classList.toggle("hidden"); };
   $("langBtn").onclick = toggle; box.querySelector(".globe").onclick = toggle;
-  list.querySelectorAll("button").forEach(b => b.onclick = () => { list.classList.add("hidden"); setLang(b.dataset.l); });
+  list.querySelectorAll("button[data-l]").forEach(b => b.onclick = () => { list.classList.add("hidden"); setLang(b.dataset.l); });
+  $("gameTextsBtn").onclick = e => { e.stopPropagation(); list.classList.add("hidden"); $("gameTextsFile").click(); };
+  $("gameTextsFile").onchange = e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if (f) pickGameTexts(f); };
 }
 document.addEventListener("click", () => { const l = $("langList"); if (l) l.classList.add("hidden"); });
 function setLang(code, save=true){
   LANG = LANGS.some(l => l[0] === code) ? code : "en";
   compile(LANG === "en" ? {} : (I18N[LANG] || {}));
   if (save){ try{ localStorage.setItem("d2s_lang", LANG); }catch(e){} }
+  gameSync();
   langPicker(); applyStatic(); redraw();
+  if (save && LANG === "ko" && api && !GAME) say("Item names and stat lines can be shown in Korean like D2 Survivors shows them: click the globe and pick D2 Survivors' resources\\app.asar (it stays in this browser).");
 }
 function redraw(){
   bootText(); badgeText(); lockPages(); helpPage();
@@ -1903,6 +1954,7 @@ async function boot(){
     py.runPython("import sys; sys.path.insert(0, '/home/pyodide/app')");
     api = py.pyimport("web_api");
     INFO = JSON.parse(api.init());
+    restoreGameTexts();
     BOOT_STATE = "ready";
     $("boot").classList.add("hidden");
     ["btnLoad","btnFile","btnPaste"].forEach(id => $(id).disabled = false);
@@ -2033,7 +2085,7 @@ function itemList(groups, listEl, viewEl){
 function renderItems(){ if(HERO) itemList(call("hero_items", HERO), $("itemList"), $("itemView")); }
 function renderStash(){ itemList(call("stash"), $("stashList"), $("stashView")); }
 function showItem(it, el){
-  const lines = it.lines.map(([t,k]) => `<div class="l ${k}">${esc(t)}</div>`).join("");
+  const lines = it.lines.map(([t,k]) => `<div class="l ${k}">${esc(k==="base"?T(t):t)}</div>`).join("");
   el.innerHTML = `<div class="tip ${it.status==="bad"?"bad":""}"><div class="t1 r-${esc(it.rarity)}">${esc(it.name)}</div><div class="t2 r-${esc(it.rarity)}">${esc(it.base)}</div>${lines}</div>
     <div class="verdict ${it.status}">${esc(T(it.status_text))}</div>
     <p class="small">${esc(title(it.rarity))} · ${esc(it.base)} · ${esc(T(it.where))} · ${esc(it.meta.split(" · ").map(T).join(" · "))}</p>
@@ -2071,16 +2123,16 @@ function renderRef(){
 }
 function refFilter(){
   const k={"All":null,"Unique":"unique","Set item":"set","Runeword":"runeword"}[$("refKind").value], cat=$("refCat").value, cls=$("refCls").value, q=$("refQ").value.trim().toLowerCase();
-  const rows = REF.filter(r => (!k||r.kind===k) && (cat==="All"||r.catLabel===cat) && (cls==="All classes"||r.cls===cls) && (!q||r.search.includes(q)));
+  const rows = REF.filter(r => (!k||r.kind===k) && (cat==="All"||r.catLabel===cat) && (cls==="All classes"||r.cls===cls) && (!q||r.search.includes(q)||(GAME&&LANG==="ko"&&(G(r.name)+" "+G(r.base)).toLowerCase().includes(q))));
   $("refCount").textContent = TF("{0} item(s)", rows.length);
-  $("refList").innerHTML = rows.slice(0,600).map((r,i)=>`<button class="it" data-k="${r.kind}" data-n="${esc(r.name)}"><span class="nm r-${r.kind}">${esc(r.name)}</span><span class="wh">${r.kind==="set"?esc(T("set"))+" · ":r.kind==="runeword"?esc(T("runeword"))+" · ":""}${esc(r.base)}</span></button>`).join("");
+  $("refList").innerHTML = rows.slice(0,600).map((r,i)=>`<button class="it" data-k="${r.kind}" data-n="${esc(r.name)}"><span class="nm r-${r.kind}">${esc(G(r.name))}</span><span class="wh">${r.kind==="set"?esc(T("set"))+" · ":r.kind==="runeword"?esc(T("runeword"))+" · ":""}${esc(r.kind==="runeword"?r.base:G(r.base))}</span></button>`).join("");
   $("refList").querySelectorAll(".it").forEach(b => b.onclick = () => { $("refList").querySelectorAll(".it").forEach(x=>x.classList.toggle("sel",x===b)); refCard(b.dataset.k, b.dataset.n); });
 }
 function refCard(kind, name){
   const c = call("reference_card", kind, name);
-  $("refCard").innerHTML = `<div class="t1 r-${kind}">${esc(c.name)}</div>` + c.meta.map(m=>`<p>${esc(m.split(" · ").map(T).join(" · "))}</p>`).join("") +
-    `<div style="margin-top:8px">${c.props.map(p=>`<div class="prop">${esc(p)}</div>`).join("")}</div>` +
-    c.sections.map(s=>`<h3 style="margin-top:12px;color:var(--gold)">${esc(T(s.title))}</h3>${s.sub?`<p>${esc(s.sub)}</p>`:""}${s.lines.map(l=>`<div class="${s.kind}">${esc(l)}</div>`).join("")}`).join("") +
+  $("refCard").innerHTML = `<div class="t1 r-${kind}">${esc(G(c.name))}</div>` + c.meta.map(m=>`<p>${esc(m.split(" · ").map(x => { const t = T(x); return t === x ? G(x) : t; }).join(" · "))}</p>`).join("") +
+    `<div style="margin-top:8px">${c.props.map(p=>`<div class="prop">${esc(G(p))}</div>`).join("")}</div>` +
+    c.sections.map(s=>`<h3 style="margin-top:12px;color:var(--gold)">${esc(T(s.title))}</h3>${s.sub?`<p>${esc(s.sub)}</p>`:""}${s.lines.map(l=>`<div class="${s.kind}">${esc(G(l))}</div>`).join("")}`).join("") +
     `<div class="row" style="margin-top:12px"><button class="lock" onclick="locked('Making items in the Item Generator')">${esc(T("Make this item"))}</button></div>`;
 }
 
