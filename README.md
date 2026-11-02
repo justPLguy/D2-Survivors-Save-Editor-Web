@@ -1,11 +1,11 @@
-# ⚔️ D2 Survivors Save Editor v10.8 — Web DEMO
+# ⚔️ D2 Survivors Save Editor v10.9 — Web DEMO
 
 A browser-based save editor for **D2 Survivors**. Load your save, change gold, see what Charsi's upgrades cost and check every item with the game's own rules. No installation needed: it runs in your browser.
 
 🌍 **Available in:** English · Polski · Deutsch · Français · 한국어 · 简体中文
 
 > ### 🆓 This is the DEMO — the full version is free on Discord
-> The web editor is **v10.8 Demo** and works with D2 Survivors **2026.1102.1**. Gold & Charsi, items (view), stash, reference, save check and export work here.
+> The web editor is **v10.9 Demo** and works with D2 Survivors **2026.1102.1**. Gold & Charsi, items (view), stash, reference, save check and export work here.
 > The Item Generator, Runewords, Charms, COPY ITEM, DESIGN, Skills and Belt editors are **previews**.
 >
 > **👉 Get the full version (free) on our Discord: https://discord.gg/nENzQxTh4**
@@ -58,6 +58,10 @@ Works with D2 Survivors **2026.1102.1** (saves from 2026.1101.1 load too). The f
 
 ## 🆕 New Since 10.5
 
+- **10.9: weapon damage and 한국어 game texts.**
+  - Weapon tooltips show **One-Hand / Two-Hand Damage** like the game (checked on 12,905 weapons), armor shows a **Base Defense** line.
+  - In **한국어**, item names and stat lines can be shown exactly like D2 Survivors shows them: click the globe and pick your game's `resources\app.asar`. It is read in your browser and kept only there.
+  - Full version: **Undo Last Change**, **Delete item**, **Copy with a new roll** from a chosen difficulty, and a **50-100% slider** for wanted rolls.
 - **10.8: game 2026.1102.1 support.** The editor's tables come from the new game, and every check matches it again.
   - **Second weapon set:** Items & Modifiers shows both sets, e.g. "weapon (set I, in hand)" and "weapon (set II)", and Check save covers both.
   - Item tooltips show **Required Level** like the game.
@@ -72,16 +76,18 @@ Items made with DEV GENERATION or Set values directly are always **NOT LEGIT** (
 
 🇬🇧 English (default) · 🇵🇱 Polski · 🇩🇪 Deutsch · 🇫🇷 Français · 🇰🇷 한국어 · 🇨🇳 简体中文
 
-Click the **globe and flag** in the top-right corner. The page switches at once and your browser remembers the choice. Item, stat, affix, skill and class names stay exactly as the game shows them. Native speaker who spots an odd line? Send a screenshot and a better wording on our [Discord](https://discord.gg/nENzQxTh4).
+Click the **globe and flag** in the top-right corner. The page switches at once and your browser remembers the choice. Item, stat, affix, skill and class names stay exactly as the game shows them. In 한국어 you can load the game's own Korean texts from your D2 Survivors install (globe → `D2 Survivors app.asar`); nothing is bundled with the editor. Native speaker who spots an odd line? Send a screenshot and a better wording on our [Discord](https://discord.gg/nENzQxTh4).
 
-## ✨ Features (v10.8)
+## ✨ Features (v10.9)
 
 | Feature | Web Demo (here) | Full version (Discord) |
 |---|:---:|:---:|
 | Load / export save codes (paste, .txt file or the game's `save.json`) | ✅ | ✅ |
 | **Gold & Charsi**: gold editing, every Charsi upgrade with gold spent, next price and gold to max, "how much gold for…" calculator | ✅ | ✅ |
 | Character & Mercenary: level, skills, mercenary | ✅ | ✅ |
-| Items & Modifiers: tooltips like in the game (with Required Level), every stat with its range, **LEGIT / NOT LEGIT** status | 👁️ view | ✅ edit |
+| Items & Modifiers: tooltips like in the game (with Required Level and weapon damage), every stat with its range, **LEGIT / NOT LEGIT** status | 👁️ view | ✅ edit |
+| **한국어 game texts** read from your own D2 Survivors files | ✅ | ✅ |
+| **Undo Last Change**, **Delete item** | — | ✅ |
 | **Both weapon sets** shown and checked | ✅ | ✅ |
 | Stash: shared, personal and uniques tabs | ✅ | ✅ |
 | Reference: every unique, set item and runeword with its ranges | ✅ | ✅ |
@@ -91,7 +97,7 @@ Click the **globe and flag** in the top-right corner. The page switches at once 
 | **Item Generator**: unique, set, rare, magic and white items made exactly like the game makes them | 👁️ preview | ✅ |
 | Rares with up to 6 chosen affixes | 👁️ preview | ✅ |
 | **Runewords** and **Charms** generators | 👁️ preview | ✅ |
-| **COPY ITEM** (exact copy or a new roll) and **DESIGN** (ring, amulet and charm pictures) | 👁️ preview | ✅ |
+| **COPY ITEM** (exact copy or a new roll from a chosen difficulty) and **DESIGN** (ring, amulet and charm pictures) | 👁️ preview | ✅ |
 | Re-roll items to the values you want (stays legit) | 👁️ preview | ✅ |
 | Put weapons and shields into **either weapon set** | 👁️ preview | ✅ |
 | **Set values directly**, also beyond the game's ranges (up to ±1000, Not legit) | 👁️ preview | ✅ |
@@ -115,7 +121,7 @@ Click the **globe and flag** in the top-right corner. The page switches at once 
 - Your save is processed **in your browser**: it is not uploaded to load or edit it.
 - After every export the editor asks whether you want to share the save code with the editor's database to help improve the editor. **Nothing is sent unless you click Yes.**
 - The update notice only reads the newest version number from GitHub. Nothing is sent.
-- Your language choice is kept only in your own browser.
+- Your language choice is kept only in your own browser. So are the Korean game texts, if you load them from your app.asar.
 
 ## ⚠️ Important: Leaderboards
 
