@@ -1,11 +1,11 @@
-# ⚔️ D2 Survivors Save Editor v10.5 — Web DEMO
+# ⚔️ D2 Survivors Save Editor v10.8 — Web DEMO
 
 A browser-based save editor for **D2 Survivors**. Load your save, change gold, see what Charsi's upgrades cost and check every item with the game's own rules. No installation needed: it runs in your browser.
 
 🌍 **Available in:** English · Polski · Deutsch · Français · 한국어 · 简体中文
 
 > ### 🆓 This is the DEMO — the full version is free on Discord
-> The web editor is **v10.5 Demo**. Gold & Charsi, items (view), stash, reference, save check and export work here.
+> The web editor is **v10.8 Demo** and works with D2 Survivors **2026.1102.1**. Gold & Charsi, items (view), stash, reference, save check and export work here.
 > The Item Generator, Runewords, Charms, COPY ITEM, DESIGN, Skills and Belt editors are **previews**.
 >
 > **👉 Get the full version (free) on our Discord: https://discord.gg/nENzQxTh4**
@@ -46,7 +46,7 @@ A browser-based save editor for **D2 Survivors**. Load your save, change gold, s
 
 **[Launch D2 Survivors Save Editor →](https://justplguy.github.io/D2-Survivors-Save-Editor-Web/)**
 
-Works with D2 Survivors **2026.1101.1**. The first visit downloads about 12 MB (the editor's Python engine); after that your browser keeps it.
+Works with D2 Survivors **2026.1102.1** (saves from 2026.1101.1 load too). The first visit downloads about 12 MB (the editor's Python engine); after that your browser keeps it.
 
 ## 🚀 Choose Your Version
 
@@ -56,26 +56,33 @@ Works with D2 Survivors **2026.1101.1**. The first visit downloads about 12 MB (
 | 💻 **EXE** | Standalone Windows application. | [EXE Repository](https://github.com/justPLguy/D2-Survivors-Save-Editor-EXE) |
 | 🐍 **Python** | Run the Python script directly. | [Python Repository](https://github.com/justPLguy/D2-Survivors-Save-Editor-PY) |
 
-## 🆕 New in 10.5: Languages
+## 🆕 New Since 10.5
+
+- **10.8: game 2026.1102.1 support.** The editor's tables come from the new game, and every check matches it again.
+  - **Second weapon set:** Items & Modifiers shows both sets, e.g. "weapon (set I, in hand)" and "weapon (set II)", and Check save covers both.
+  - Item tooltips show **Required Level** like the game.
+  - Bul-Kathos' Sacred Charge, Famine and Naj's Circlet read as legit from both Diablo II and Resurrected files.
+  - Full version: weapons and shields can go into either set; runewords on class bases keep the base's own property; Civerb's Cudgel and Trang-Oul's Claws come with their new fixed bonuses.
+- **10.7: DEV GENERATION** (full version): any unique or set item with up to 48 stats of your choice, values 1-1000, for testing builds offline.
+- **10.6: Set values directly beyond the game's ranges** (full version): any value the game still reads, up to ±1000, for testing builds offline.
+
+Items made with DEV GENERATION or Set values directly are always **NOT LEGIT** (red border in the game; worn, they keep runs off the ladder).
+
+## 🌍 Languages
 
 🇬🇧 English (default) · 🇵🇱 Polski · 🇩🇪 Deutsch · 🇫🇷 Français · 🇰🇷 한국어 · 🇨🇳 简体中文
 
-- Click the **globe and flag** in the top-right corner and pick your language.
-- The whole page switches **at once**, and the browser remembers your choice for the next visit.
-- Everything is translated: tabs, buttons, messages, Check save results, the update notice, the locked previews and the **HOW TO USE EDITOR** guide.
-- Item, stat, affix, skill and class names stay **exactly as the game shows them**, so you can still find everything in-game.
-- The language only changes what you see. Your save is handled the same way in every language.
+Click the **globe and flag** in the top-right corner. The page switches at once and your browser remembers the choice. Item, stat, affix, skill and class names stay exactly as the game shows them. Native speaker who spots an odd line? Send a screenshot and a better wording on our [Discord](https://discord.gg/nENzQxTh4).
 
-Native speaker who spots an odd line? Send a screenshot and a better wording on our [Discord](https://discord.gg/nENzQxTh4).
-
-## ✨ Features (v10.5)
+## ✨ Features (v10.8)
 
 | Feature | Web Demo (here) | Full version (Discord) |
 |---|:---:|:---:|
 | Load / export save codes (paste, .txt file or the game's `save.json`) | ✅ | ✅ |
 | **Gold & Charsi**: gold editing, every Charsi upgrade with gold spent, next price and gold to max, "how much gold for…" calculator | ✅ | ✅ |
 | Character & Mercenary: level, skills, mercenary | ✅ | ✅ |
-| Items & Modifiers: tooltips like in the game, every stat with its range, **LEGIT / NOT LEGIT** status | 👁️ view | ✅ edit |
+| Items & Modifiers: tooltips like in the game (with Required Level), every stat with its range, **LEGIT / NOT LEGIT** status | 👁️ view | ✅ edit |
+| **Both weapon sets** shown and checked | ✅ | ✅ |
 | Stash: shared, personal and uniques tabs | ✅ | ✅ |
 | Reference: every unique, set item and runeword with its ranges | ✅ | ✅ |
 | Check save with the game's own rules (items + hero builds) | ✅ | ✅ |
@@ -86,6 +93,9 @@ Native speaker who spots an odd line? Send a screenshot and a better wording on 
 | **Runewords** and **Charms** generators | 👁️ preview | ✅ |
 | **COPY ITEM** (exact copy or a new roll) and **DESIGN** (ring, amulet and charm pictures) | 👁️ preview | ✅ |
 | Re-roll items to the values you want (stays legit) | 👁️ preview | ✅ |
+| Put weapons and shields into **either weapon set** | 👁️ preview | ✅ |
+| **Set values directly**, also beyond the game's ranges (up to ±1000, Not legit) | 👁️ preview | ✅ |
+| **DEV GENERATION**: unique or set items with up to 48 stats of your choice (Not legit) | 👁️ preview | ✅ |
 | **Skills** editor, **Belt & Potions** editor | 👁️ preview | ✅ |
 
 ## 🧭 How to Use
