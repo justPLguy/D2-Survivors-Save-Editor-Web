@@ -1,0 +1,2172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D2 Survivors Save Editor v10.8 — Web DEMO</title>
+<meta name="description" content="D2 Survivors Save Editor in your browser: load your save, change gold, see Charsi's prices, check every item with the game's own rules. The full version is free on Discord.">
+<style>
+:root{color-scheme:dark;--bg:#151515;--panel:#211f1d;--panel2:#1a1918;--line:#4a4339;--text:#eee;--muted:#b3ab9f;--gold:#e0b85b;--purple:#a88be0;--green:#7fd492;--red:#ef8a8a;--orange:#e6a04a;
+--u:#c7b377;--set:#3fd23f;--rare:#f2f27a;--magic:#7a7aff;--normal:#e8e8e8;--blue:#8d8dff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",Arial,sans-serif}
+a{color:var(--gold)}
+header{padding:16px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#221d16,#1a1816)}
+.hrow{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;max-width:1450px;margin:auto}
+h1{font-size:23px;margin:0;color:var(--gold);letter-spacing:.3px}
+h2{font-size:17px;margin:0 0 10px;color:var(--gold)}
+h3{font-size:15px;margin:0 0 8px}
+p{color:var(--muted);margin:5px 0}
+main{max-width:1450px;margin:auto;padding:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px}
+textarea,input,select,button{font:inherit;border:1px solid #5d554a;border-radius:5px;background:#131313;color:var(--text);padding:8px}
+textarea{width:100%;resize:vertical;min-height:74px;font:12px Consolas,monospace}
+button{cursor:pointer;background:#34302a;border-color:#8e7540}
+button:hover:not(:disabled){background:#49402e}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:#604d21;border-color:var(--gold);font-weight:700}
+button.lock{background:#2a2433;border-color:#6d5a96;color:#d7c9f5}
+button.lock:before{content:"🔒 "}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.small{font-size:12px;color:var(--muted)}
+.hidden{display:none!important}
+.status{padding:8px 10px;background:#131313;border-left:3px solid var(--gold);margin-top:10px;white-space:pre-wrap}
+.status.err{border-color:var(--red);color:#ffc2c2}
+/* update badge */
+#badge{display:inline-block;padding:6px 12px;border-radius:5px;font-weight:700;font-size:13px;color:#a09eaf;cursor:default;user-select:none}
+#badge.ok{background:#1f5a33;color:#c8f7d6}
+#badge.new{color:#fff;cursor:pointer;animation:flash 1.2s steps(1) infinite}
+@keyframes flash{0%{background:#c0392b}50%{background:#e67e22}}
+/* demo banner */
+.demo{display:flex;gap:14px;align-items:center;background:#7b3fe4;color:#fff;border-radius:8px;padding:9px 14px;margin-bottom:12px;flex-wrap:wrap}
+.demo b{font-size:18px;letter-spacing:1px}
+.demo span{flex:1;min-width:240px}
+.demo a{background:#fff;color:#5a22c7;font-weight:800;text-decoration:none;padding:8px 14px;border-radius:6px;white-space:nowrap}
+/* discord card */
+.discord{display:flex;gap:14px;align-items:center;border:1px solid #8064bd;border-radius:10px;padding:12px 16px;background:linear-gradient(120deg,#292039,#211b2c 58%,#30251b)}
+.discord .ic{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#5865f2;font-size:24px}
+.discord b{color:#fff}
+.discord a{display:inline-block;padding:9px 14px;border-radius:7px;background:#5865f2;color:#fff;text-decoration:none;font-weight:800;white-space:nowrap}
+/* loader */
+#boot{display:flex;gap:10px;align-items:center}
+.spin{width:16px;height:16px;border:2px solid #555;border-top-color:var(--gold);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* hero bar */
+.herobar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.hero{padding:7px 12px;border:1px solid #5d554a;border-radius:6px;background:#1b1a18;cursor:pointer}
+.hero.active{border-color:var(--gold);background:#3a301f;color:var(--gold);font-weight:700}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;background:#2b2722;color:var(--muted);font-size:12px;margin-left:6px}
+/* tabs */
+.tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.tab{padding:9px 14px;border-radius:6px}
+.tab.active{border-color:var(--gold);color:var(--gold);background:#2d271d}
+.tab.locked{border-color:#5a4a7d;color:#c8b8ef}
+.tab.locked:after{content:" 🔒";font-size:11px}
+.tab.help{background:#a83a32;border-color:#e2675d;color:#fff;font-weight:700}
+.page{display:none}.page.active{display:block}
+/* items */
+.cols{display:grid;grid-template-columns:minmax(260px,1fr) minmax(0,1.4fr);gap:12px}
+.list{max-height:640px;overflow:auto;padding-right:4px}
+.grp{color:var(--gold);font-weight:700;margin:10px 0 5px;font-size:13px;text-transform:uppercase;letter-spacing:.5px}
+.it{display:flex;gap:8px;align-items:center;width:100%;text-align:left;background:#181716;border-color:#3d3830;margin-bottom:4px;padding:7px 9px}
+.it .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.it .nm{flex:1}
+.it .wh{color:var(--muted);font-size:12px}
+.it.sel{border-color:var(--gold);background:#30291d}
+.r-unique,.r-runeword{color:var(--u)}.r-set{color:var(--set)}.r-rare{color:var(--rare)}.r-magic{color:var(--magic)}.r-normal,.r-white{color:var(--normal)}.r-crafted{color:var(--orange)}
+.dot.ok{background:var(--green)}.dot.bad{background:var(--red)}
+.tip{background:rgba(8,8,8,.96);border:1px solid #6b5a3a;border-radius:4px;padding:14px 16px;text-align:center;font-family:"Exocet","Palatino Linotype",Georgia,serif;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.tip.bad{border-color:#d03b3b;box-shadow:0 0 0 2px #7a1c1c}
+.tip .t1{font-size:18px}
+.tip .t2{color:#cfcfcf;margin-bottom:8px}
+.tip .l{line-height:1.6}
+.tip .stat{color:var(--blue)}.tip .bonus{color:var(--set)}.tip .defense,.tip .implicit{color:#fff}
+.verdict{margin:10px 0;padding:8px 10px;border-radius:5px;font-weight:700}
+.verdict.ok{background:#16301f;color:var(--green)}.verdict.bad{background:#3a1717;color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:6px;border-bottom:1px solid #3c3731;vertical-align:top}
+th{color:var(--gold);position:sticky;top:0;background:#26231f}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tablewrap{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:6px}
+/* gold */
+.goldgrid{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1.2fr);gap:12px}
+.big{font-size:24px;font-weight:700;color:var(--gold)}
+/* reference */
+.refcard .t1{font-size:19px;font-weight:700}
+.refcard .prop{color:var(--blue)}.refcard .bonus{color:var(--set)}
+/* locked pages */
+.lockcard{border:1px dashed #7b63b3;background:#1e1a27;border-radius:10px;padding:18px}
+.lockcard ul{color:#d8d0e7}
+.lockcard a{display:inline-block;margin-top:8px;padding:10px 16px;border-radius:7px;background:#7b3fe4;color:#fff;font-weight:800;text-decoration:none}
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:grid;place-items:center;z-index:50}
+#modal .box{background:#24211d;border:1px solid var(--gold);border-radius:10px;max-width:640px;width:calc(100% - 32px);padding:18px;max-height:85vh;overflow:auto}
+#modal .box pre{white-space:pre-wrap;color:var(--muted);font:13px/1.45 "Segoe UI",Arial,sans-serif;margin:8px 0 14px}
+.check .bad{color:var(--red);font-weight:700}
+.check .ok{color:var(--green)}
+footer{text-align:center;color:#999;font-size:12px;padding:22px 12px 18px;border-top:1px solid var(--line);margin-top:18px}
+.footer-title{color:var(--gold);font-size:13px;font-weight:700;margin-bottom:9px}
+.footer-socials{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin:0 auto 10px}
+.footer-socials a{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid #62543a;border-radius:5px;background:#24211c;color:#eee;text-decoration:none;font-size:13px}
+.footer-socials a:hover{background:#393124;border-color:var(--gold);color:var(--gold)}
+.warnbox{max-width:900px;margin:0 auto 14px;padding:12px;border:1px solid #8a4545;border-radius:6px;background:#2a1919;color:#ffb4b4;font-weight:700}
+@media(max-width:860px){.cols,.goldgrid{grid-template-columns:1fr}header{padding:14px}h1{font-size:20px}main{padding:9px}.panel{padding:10px}table{min-width:640px}}
+</style>
+<style>
+/* language picker */
+.topright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.lang{position:relative;display:flex;align-items:center;gap:6px}
+.lang .globe{width:18px;height:18px;cursor:pointer}
+.lang > button{display:flex;align-items:center;gap:7px;padding:5px 10px;border-color:var(--gold);background:#1a1816;font-weight:700}
+.lang img.flag{width:24px;height:16px;border-radius:2px;display:block}
+.lang ul{position:absolute;right:0;top:calc(100% + 4px);z-index:60;list-style:none;margin:0;padding:4px;background:#24211d;border:1px solid var(--gold);border-radius:7px;min-width:170px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.lang li button{display:flex;align-items:center;gap:9px;width:100%;border:0;background:none;padding:7px 9px;text-align:left}
+.lang li button:hover,.lang li button.cur{background:#3a301f;color:var(--gold)}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div>
+      <h1>D2 Survivors Save Editor v10.8 — Web DEMO</h1>
+      <p data-t>Load a save, change gold, see Charsi's prices and check every item with the game's own rules, then export.</p>
+    </div>
+    <div class="topright">
+      <div class="lang" id="lang"></div>
+      <div id="badge">Checking for updates…</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="demo">
+    <b>DEMO</b>
+    <span data-th>Gold &amp; Charsi, items (view), stash, reference, save check and export work here. Item Generator, Runewords, Charms, Skills, Belt, COPY ITEM and DESIGN are previews — <strong>the full version is free on our Discord.</strong></span>
+    <a href="https://discord.gg/nENzQxTh4" target="_blank" rel="noopener" data-t>GET THE FULL VERSION</a>
+  </div>
+
+  <section class="panel">
+    <h2 data-t>1. Your save</h2>
+    <p data-th>In the game open <b>SAVES</b>, copy your save code (it starts with <code>D2S1:</code>) and paste it here. You can also load a code saved in a .txt file, or the game's own <code>save.json</code>.</p>
+    <textarea id="code" placeholder="D2S1:..." spellcheck="false"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="primary" id="btnLoad" disabled data-t>Load Save Code</button>
+      <button id="btnFile" disabled data-t>Load from File…</button>
+      <button id="btnPaste" disabled data-t>Paste Clipboard</button>
+      <button id="btnClear" data-t>Clear</button>
+      <input type="file" id="file" accept=".txt,.json,.d2s,text/plain,application/json" class="hidden">
+    </div>
+    <div id="boot" class="status"><div class="spin"></div><span id="bootText"></span></div>
+    <div id="msg" class="status hidden"></div>
+  </section>
+
+  <section id="work" class="hidden">
+    <div class="herobar" id="heroes"></div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-p="char" data-t>Character &amp; Mercenary</button>
+      <button class="tab" data-p="gold" data-t>Gold &amp; Charsi</button>
+      <button class="tab" data-p="items" data-t>Items &amp; Modifiers</button>
+      <button class="tab" data-p="stash" data-t>Stash</button>
+      <button class="tab" data-p="ref" data-t>Reference</button>
+      <button class="tab" data-p="check" data-t>Check save</button>
+      <button class="tab" data-p="export" data-t>Preview &amp; Export</button>
+      <button class="tab locked" data-p="lock-gen" data-t>Item Generator</button>
+      <button class="tab locked" data-p="lock-rw" data-t>Runewords &amp; Charms</button>
+      <button class="tab locked" data-p="lock-skills" data-t>Skills</button>
+      <button class="tab locked" data-p="lock-belt" data-t>Belt &amp; Potions</button>
+      <button class="tab help" data-p="help" data-t>? HOW TO USE EDITOR</button>
+    </nav>
+
+    <section class="page active panel" id="p-char"></section>
+
+    <section class="page panel" id="p-gold">
+      <div class="goldgrid">
+        <div class="panel" style="margin:0">
+          <h2 data-t>Gold</h2>
+          <div class="big" id="goldNow">-</div>
+          <div class="row" style="margin-top:10px">
+            <label><span data-t>New amount</span> <input id="goldIn" inputmode="numeric" style="width:180px"></label>
+            <button class="primary" id="goldApply" data-t>Apply Gold</button>
+          </div>
+          <div class="row" style="margin-top:8px" id="goldQuick"></div>
+          <p class="small" id="goldCap"></p>
+        </div>
+        <div class="panel" style="margin:0">
+          <h2 data-t>How much gold for…</h2>
+          <div class="row">
+            <label><span data-t>Ware</span> <select id="calcWare"></select></label>
+            <label><span data-t>up to level</span> <input id="calcLvl" type="number" min="1" style="width:90px"></label>
+            <button id="calcGo" data-t>Calculate</button>
+          </div>
+          <p id="calcOut" style="color:var(--text)"></p>
+          <button id="calcAdd" disabled data-t>Add exactly that much gold</button>
+        </div>
+      </div>
+      <h2 style="margin-top:14px" data-t>Charsi's wares in this save</h2>
+      <div class="tablewrap"><table id="charsiTbl"></table></div>
+      <p id="charsiTot" style="color:var(--text);font-weight:700"></p>
+    </section>
+
+    <section class="page panel" id="p-items">
+      <div class="cols">
+        <div><div class="list" id="itemList"></div></div>
+        <div id="itemView"><p data-t>Pick an item on the left.</p></div>
+      </div>
+    </section>
+
+    <section class="page panel" id="p-stash">
+      <div class="cols">
+        <div><div class="list" id="stashList"></div></div>
+        <div id="stashView"><p data-t>Pick an item on the left.</p></div>
+      </div>
+    </section>
+
+    <section class="page panel" id="p-ref">
+      <p id="refInfo"></p>
+      <div class="cols">
+        <div>
+          <div class="row">
+            <select id="refKind"><option value="All" data-t>All</option><option value="Unique" data-t>Unique</option><option value="Set item" data-t>Set item</option><option value="Runeword" data-t>Runeword</option></select>
+            <select id="refCat"><option value="All" data-t>All</option></select>
+            <select id="refCls"><option value="All classes" data-t>All classes</option></select>
+          </div>
+          <input id="refQ" data-tp placeholder="Search names or properties, e.g. faster cast" style="width:100%;margin-top:8px">
+          <p class="small" id="refCount"></p>
+          <div class="list" id="refList" style="max-height:560px"></div>
+        </div>
+        <div id="refCard" class="tip refcard" style="text-align:left"><p data-t>Pick an item on the left.</p></div>
+      </div>
+    </section>
+
+    <section class="page panel check" id="p-check">
+      <div class="row"><button class="primary" id="checkGo" data-t>Check save</button><span class="small" data-t>The game's own checks for every item (readable, legit) and every hero build.</span></div>
+      <div id="checkOut" style="margin-top:12px"></div>
+    </section>
+
+    <section class="page panel" id="p-export">
+      <h2 data-t>Changes</h2>
+      <div id="changes" class="status"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="primary" id="genBtn" data-t>Generate Save Code</button>
+        <button id="resetBtn" data-t>Reset Changes</button>
+      </div>
+      <div id="outWrap" class="hidden" style="margin-top:12px">
+        <h2 data-t>New save code</h2>
+        <p data-th>Copy the whole code into the game's <b>SAVES</b> menu. Keep your original code too.</p>
+        <textarea id="out" readonly style="min-height:120px"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="primary" id="copyOut" data-t>Copy Code</button>
+          <button id="saveOut" data-t>Save to File…</button>
+          <button id="saveOrig" data-t>Save Original to File…</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page panel" id="p-lock-gen"></section>
+    <section class="page panel" id="p-lock-rw"></section>
+    <section class="page panel" id="p-lock-skills"></section>
+    <section class="page panel" id="p-lock-belt"></section>
+    <section class="page panel" id="p-help"></section>
+  </section>
+
+  <section class="discord">
+    <div class="ic">💬</div>
+    <div style="flex:1"><b data-t>Join our Discord</b><p data-t>The full version is free there: Item Generator, Runewords, Charms, COPY ITEM, Skills and Belt editors. Updates, help and item requests too.</p></div>
+    <a href="https://discord.gg/nENzQxTh4" target="_blank" rel="noopener" data-t>Join Discord ↗</a>
+  </section>
+</main>
+
+<footer>
+  <div class="warnbox" data-t>⚠️ LEADERBOARD WARNING: Modified saves may flag your character. Runs made with an edited character will not count toward leaderboards. Keep an untouched backup of your original save.</div>
+  <div class="footer-title" data-t>Follow Just a Polish Guy</div>
+  <nav class="footer-socials">
+    <a href="https://discord.gg/nENzQxTh4" target="_blank" rel="noopener">💬 Discord <span class="small" data-t>Community &amp; support</span></a>
+    <a href="https://www.youtube.com/@justPLguy" target="_blank" rel="noopener">▶ YouTube <span class="small" data-t>Tutorials &amp; videos</span></a>
+    <a href="https://github.com/justPLguy" target="_blank" rel="noopener">⌘ GitHub <span class="small" data-t>Projects &amp; code</span></a>
+    <a href="https://www.facebook.com/justPLguy" target="_blank" rel="noopener">f Facebook <span class="small" data-t>Follow the project</span></a>
+  </nav>
+  <div data-t>Created by Just a Polish Guy · D2 Survivors Save Editor · an independent community project, not affiliated with the game's developers</div>
+</footer>
+
+<div id="modal" class="hidden"><div class="box"><h2 id="mTitle"></h2><pre id="mText"></pre><div class="row" id="mBtns"></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+<script>
+/* D2 Survivors Save Editor - Web DEMO translations (English is the source and the fallback). */
+const I18N = {
+ "pl": {
+  "{0} (set I, in hand)": "{0} (zestaw I, w rękach)",
+  "{0} (set II, in hand)": "{0} (zestaw II, w rękach)",
+  "{0} (set I)": "{0} (zestaw I)",
+  "{0} (set II)": "{0} (zestaw II)",
+  "Put weapons and shields into either weapon set": "Wkładanie broni i tarcz do dowolnego zestawu broni",
+  "DEV GENERATION: unique or set items with up to 48 stats of your choice, values 1-1000 (Not legit, for testing builds offline)": "DEV GENERATION: unikaty i przedmioty z setów z maksymalnie 48 wybranymi statystykami, wartości 1-1000 (Not legit, do testowania buildów offline)",
+  "Runewords on class bases keep the base's own property, like in the game": "Słowa runiczne na bazach klasowych zachowują własność bazy, jak w grze",
+  "Load a save, change gold, see Charsi's prices and check every item with the game's own rules, then export.": "Wczytaj zapis, zmień złoto, sprawdź ceny u Charsi i sprawdź każdy przedmiot zasadami samej gry, a potem wyeksportuj.",
+  "Gold &amp; Charsi, items (view), stash, reference, save check and export work here. Item Generator, Runewords, Charms, Skills, Belt, COPY ITEM and DESIGN are previews — <strong>the full version is free on our Discord.</strong>": "Działają tu: Złoto i Charsi, przedmioty (podgląd), skrzynia, encyklopedia, sprawdzanie zapisu i eksport. Generator przedmiotów, Słowa runiczne, Talizmany, Umiejętności, Pas, KOPIUJ PRZEDMIOT i WYGLĄD to podgląd — <strong>pełna wersja jest za darmo na naszym Discordzie.</strong>",
+  "GET THE FULL VERSION": "POBIERZ PEŁNĄ WERSJĘ",
+  "1. Your save": "1. Twój zapis",
+  "In the game open <b>SAVES</b>, copy your save code (it starts with <code>D2S1:</code>) and paste it here. You can also load a code saved in a .txt file, or the game's own <code>save.json</code>.": "W grze otwórz <b>SAVES</b>, skopiuj kod zapisu (zaczyna się od <code>D2S1:</code>) i wklej go tutaj. Możesz też wczytać kod zapisany w pliku .txt albo plik gry <code>save.json</code>.",
+  "Load Save Code": "Wczytaj kod zapisu",
+  "Load from File…": "Wczytaj z pliku…",
+  "Paste Clipboard": "Wklej ze schowka",
+  "Clear": "Wyczyść",
+  "Character & Mercenary": "Postać i najemnik",
+  "Gold & Charsi": "Złoto i Charsi",
+  "Items & Modifiers": "Przedmioty i modyfikatory",
+  "Stash": "Skrzynia",
+  "Reference": "Encyklopedia",
+  "Check save": "Sprawdź zapis",
+  "Preview & Export": "Podgląd i eksport",
+  "Item Generator": "Generator przedmiotów",
+  "Runewords & Charms": "Słowa runiczne i Talizmany",
+  "Skills": "Umiejętności",
+  "Belt & Potions": "Pas i mikstury",
+  "? HOW TO USE EDITOR": "? JAK UŻYWAĆ EDYTORA",
+  "Gold": "Złoto",
+  "New amount": "Nowa kwota",
+  "Apply Gold": "Zastosuj złoto",
+  "How much gold for…": "Ile złota na…",
+  "Ware": "Towar",
+  "up to level": "do poziomu",
+  "Calculate": "Oblicz",
+  "Add exactly that much gold": "Dodaj dokładnie tyle złota",
+  "Charsi's wares in this save": "Towary Charsi w tym zapisie",
+  "Pick an item on the left.": "Wybierz przedmiot po lewej.",
+  "All": "Wszystkie",
+  "Unique": "Unikat",
+  "Set item": "Przedmiot z zestawu",
+  "Runeword": "Słowo runiczne",
+  "All classes": "Wszystkie klasy",
+  "The game's own checks for every item (readable, legit) and every hero build.": "Własne sprawdzenia gry dla każdego przedmiotu (czytelny, legit) i każdego buildu bohatera.",
+  "Changes": "Zmiany",
+  "Generate Save Code": "Generuj kod zapisu",
+  "Reset Changes": "Cofnij zmiany",
+  "New save code": "Nowy kod zapisu",
+  "Copy the whole code into the game's <b>SAVES</b> menu. Keep your original code too.": "Skopiuj cały kod do menu <b>SAVES</b> w grze. Zachowaj też oryginalny kod.",
+  "Copy Code": "Kopiuj kod",
+  "Save to File…": "Zapisz do pliku…",
+  "Save Original to File…": "Zapisz oryginał do pliku…",
+  "Join our Discord": "Dołącz do naszego Discorda",
+  "The full version is free there: Item Generator, Runewords, Charms, COPY ITEM, Skills and Belt editors. Updates, help and item requests too.": "Tam pełna wersja jest za darmo: Generator przedmiotów, Słowa runiczne, Talizmany, KOPIUJ PRZEDMIOT, edytory Umiejętności i Pasa. Do tego aktualizacje, pomoc i prośby o przedmioty.",
+  "Join Discord ↗": "Dołącz do Discorda ↗",
+  "⚠️ LEADERBOARD WARNING: Modified saves may flag your character. Runs made with an edited character will not count toward leaderboards. Keep an untouched backup of your original save.": "⚠️ OSTRZEŻENIE O RANKINGU: zmienione zapisy mogą oznaczyć Twoją postać. Runy zrobione edytowaną postacią nie liczą się do rankingów. Trzymaj nietkniętą kopię oryginalnego zapisu.",
+  "Follow Just a Polish Guy": "Obserwuj Just a Polish Guy",
+  "Community & support": "Społeczność i pomoc",
+  "Tutorials & videos": "Poradniki i filmy",
+  "Projects & code": "Projekty i kod",
+  "Follow the project": "Śledź projekt",
+  "Created by Just a Polish Guy · D2 Survivors Save Editor · an independent community project, not affiliated with the game's developers": "Stworzone przez Just a Polish Guy · D2 Survivors Save Editor · niezależny projekt społeczności, niezwiązany z twórcami gry",
+  "Search names or properties, e.g. faster cast": "Szukaj nazw lub właściwości, np. faster cast",
+  "Gold: {0}": "Złoto: {0}",
+  "Full version only": "Tylko w pełnej wersji",
+  "{0} is in the full version of the editor.\n\nThe full version is FREE on our Discord: {1}": "{0} jest w pełnej wersji edytora.\n\nPełna wersja jest ZA DARMO na naszym Discordzie: {1}",
+  "Loading the game's rules (first visit downloads about 12 MB, then it is cached)…": "Wczytywanie zasad gry (przy pierwszej wizycie pobiera się ok. 12 MB, potem jest w pamięci przeglądarki)…",
+  "Loading the editor's game data…": "Wczytywanie danych gry edytora…",
+  "The editor could not start: {0}. Refresh the page; if it keeps happening, tell us on Discord.": "Edytor nie mógł wystartować: {0}. Odśwież stronę; jeśli to się powtarza, daj nam znać na Discordzie.",
+  "Ready. Paste your save code and click Load Save Code.": "Gotowe. Wklej kod zapisu i kliknij Wczytaj kod zapisu.",
+  "Checking for updates…": "Sprawdzanie aktualizacji…",
+  "YOU HAVE v{0} (WEB) · STABLE v{1} IS AVAILABLE ON DISCORD · CLICK TO JOIN": "MASZ v{0} (WEB) · STABILNA v{1} JEST NA DISCORDZIE · KLIKNIJ, ABY DOŁĄCZYĆ",
+  "YOU HAVE v{0} (WEB) · THE FULL STABLE VERSION IS FREE ON DISCORD · CLICK TO JOIN": "MASZ v{0} (WEB) · PEŁNA STABILNA WERSJA JEST ZA DARMO NA DISCORDZIE · KLIKNIJ, ABY DOŁĄCZYĆ",
+  "Save loaded: {0}, {1} hero(es), {2} items, {3} gold.": "Zapis wczytany: {0}, bohaterów: {1}, przedmiotów: {2}, złota: {3}.",
+  "The game has already marked this save as edited.": "Gra już oznaczyła ten zapis jako edytowany.",
+  "Could not load the save: {0}": "Nie można wczytać zapisu: {0}",
+  "The browser did not allow reading the clipboard. Paste with Ctrl+V into the box instead.": "Przeglądarka nie pozwoliła odczytać schowka. Wklej kod Ctrl+V do pola.",
+  "Hero:": "Bohater:",
+  "lvl {0}": "poz. {0}",
+  "No hero in this save yet.": "W tym zapisie nie ma jeszcze bohatera.",
+  "(active)": "(aktywny)",
+  "{0} item(s) worn": "założonych przedmiotów: {0}",
+  "skills:": "umiejętności:",
+  "No mercenary hired.": "Brak wynajętego najemnika.",
+  "No skills picked yet.": "Jeszcze bez wybranych umiejętności.",
+  "Level": "Poziom",
+  "Difficulty": "Trudność",
+  "act {0}": "akt {0}",
+  "State": "Stan",
+  "Items": "Przedmioty",
+  "{0} equipped · {1} in inventory · {2} charms": "założone: {0} · w ekwipunku: {1} · talizmany: {2}",
+  "Mercenary": "Najemnik",
+  "Editing skills": "Edycja umiejętności",
+  "Edit skills": "Edytuj umiejętności",
+  "Editing the belt and potions": "Edycja pasa i mikstur",
+  "Edit belt": "Edytuj pas",
+  "The game accepts up to {0} gold.": "Gra przyjmuje do {0} złota.",
+  "Gold set to {0}. Open Preview & Export to make the new save code.": "Złoto ustawione na {0}. Otwórz Podgląd i eksport, aby zrobić nowy kod zapisu.",
+  "Gold in the save: {0}": "Złoto w zapisie: {0}",
+  "Rank": "Ranga",
+  "Extra ranks": "Dodatkowe rangi",
+  "Bonus now (ranks)": "Premia teraz (rangi)",
+  "Gold spent": "Wydane złoto",
+  "Next level costs": "Następny poziom kosztuje",
+  "Gold to max": "Złoto do maksimum",
+  "Each rank gives": "Każda ranga daje",
+  "not in Hardcore": "brak w Hardcore",
+  "maxed": "max",
+  "extra:": "dodatkowo:",
+  "(less each rank)": "(mniej z każdą rangą)",
+  "Spent at Charsi so far: {0} gold · To max every ware: {1} gold · Gold now: {2} ({3}% of that)": "Wydane u Charsi do tej pory: {0} złota · Do maksimum wszystkich towarów: {1} złota · Złoto teraz: {2} ({3}% tego)",
+  "Spent at Charsi so far: {0} gold · every ware is maxed": "Wydane u Charsi do tej pory: {0} złota · wszystkie towary na maksimum",
+  "Type a level.": "Wpisz poziom.",
+  "Empty.": "Pusto.",
+  "Pick an item on the left. A green dot means the game sees it as legit, red means it does not.": "Wybierz przedmiot po lewej. Zielona kropka znaczy, że gra uznaje go za legit, czerwona — że nie.",
+  "Show every stat and its range": "Pokaż każdą statystykę i jej zakres",
+  "Re-roll to wanted values": "Przelosuj do wybranych wartości",
+  "Set values directly": "Ustaw wartości bezpośrednio",
+  "COPY ITEM": "KOPIUJ PRZEDMIOT",
+  "DESIGN": "WYGLĄD",
+  "Stat in save": "Statystyka w zapisie",
+  "Shown in game as": "W grze widać jako",
+  "Value": "Wartość",
+  "Game range": "Zakres w grze",
+  "Source": "Źródło",
+  "Every unique, set item and runeword in the game, with what it can roll. From the game's own tables ({0}).": "Każdy unikat, przedmiot z zestawu i słowo runiczne w grze, z tym, co może wylosować. Z tabel samej gry ({0}).",
+  "{0} item(s)": "Przedmiotów: {0}",
+  "set": "zestaw",
+  "runeword": "słowo runiczne",
+  "Making items in the Item Generator": "Tworzenie przedmiotów w Generatorze przedmiotów",
+  "Make this item": "Stwórz ten przedmiot",
+  "Checking every item with the game's rules…": "Sprawdzanie każdego przedmiotu zasadami gry…",
+  "Items checked with the game's own rules ({0}):": "Przedmioty sprawdzone zasadami gry ({0}):",
+  "{0} to review": "{0} do przejrzenia",
+  "{0} regenerate exactly from their roll; {1} have no roll and pass the game's range rules.": "{0} odtwarza się dokładnie ze swojego losowania; {1} nie ma losowania i przechodzi zasady zakresów gry.",
+  "UNREADABLE: the game drops this item when it loads the save. NOT LEGIT: the game shows a red \"Not legit\" border; worn, it keeps runs off the ladder.": "NIECZYTELNY: gra usuwa ten przedmiot przy wczytywaniu zapisu. NOT LEGIT: gra pokazuje czerwoną ramkę „Not legit”; założony blokuje runy na ladderze.",
+  "Result": "Wynik",
+  "Where": "Gdzie",
+  "Item": "Przedmiot",
+  "Why": "Dlaczego",
+  "Hero builds": "Buildy bohaterów",
+  "All hero builds pass the game's build check.": "Wszystkie buildy bohaterów przechodzą kontrolę buildu gry.",
+  "Gold is over the game's limit of {0}.": "Złoto przekracza limit gry: {0}.",
+  "No changes yet. Change the gold in Gold & Charsi first.": "Jeszcze bez zmian. Najpierw zmień złoto w Złoto i Charsi.",
+  "Changes discarded.": "Zmiany odrzucone.",
+  "No changes": "Brak zmian",
+  "Hero build check": "Kontrola buildu bohatera",
+  "The game's build check rejects these hero builds (the game reports them and keeps the save off the leaderboard):": "Kontrola buildu gry odrzuca te buildy bohaterów (gra je zgłasza i zapis nie trafia do rankingu):",
+  "Export anyway?": "Eksportować mimo to?",
+  "Items the game cannot read": "Przedmioty, których gra nie odczyta",
+  "The game will DROP these items when it loads the save:": "Gra USUNIE te przedmioty przy wczytywaniu zapisu:",
+  "New save code generated. Copy it into the game's SAVES menu.": "Nowy kod zapisu wygenerowany. Skopiuj go do menu SAVES w grze.",
+  "Share Generated Save?": "Udostępnić wygenerowany zapis?",
+  "Save Submitted": "Zapis wysłany",
+  "Save Submission Failed": "Wysyłanie zapisu nieudane",
+  "Your save was generated and can still be used normally. Uploading it to the database failed.": "Zapis został wygenerowany i nadal możesz go normalnie używać. Wysyłanie do bazy danych się nie powiodło.",
+  "Details: {0}": "Szczegóły: {0}",
+  "Could not generate the save: {0}": "Nie można wygenerować zapisu: {0}",
+  "Copied. Paste it into the game's SAVES menu.": "Skopiowano. Wklej go do menu SAVES w grze.",
+  "Copied.": "Skopiowano.",
+  "Original": "Oryginał",
+  "full version": "pełna wersja",
+  "Preview of what the full editor does:": "Podgląd tego, co robi pełny edytor:",
+  "The full version is free on our Discord, together with updates, help and item requests.": "Pełna wersja jest za darmo na naszym Discordzie, razem z aktualizacjami, pomocą i prośbami o przedmioty.",
+  "GET THE FULL VERSION ON DISCORD": "POBIERZ PEŁNĄ WERSJĘ NA DISCORDZIE",
+  "How to use the web editor": "Jak używać edytora w przeglądarce",
+  "<b>Load your save.</b> In the game open <b>SAVES</b>, copy the code (starts with <code>D2S1:</code>), paste it at the top and click <b>Load Save Code</b>. Keep the original code somewhere safe.": "<b>Wczytaj zapis.</b> W grze otwórz <b>SAVES</b>, skopiuj kod (zaczyna się od <code>D2S1:</code>), wklej go u góry i kliknij <b>Wczytaj kod zapisu</b>. Trzymaj oryginalny kod w bezpiecznym miejscu.",
+  "<b>Pick a hero</b> in the bar above the tabs. Character &amp; Mercenary shows the level, skills and mercenary.": "<b>Wybierz bohatera</b> na pasku nad zakładkami. Postać i najemnik pokazuje poziom, umiejętności i najemnika.",
+  "<b>Gold &amp; Charsi:</b> type a new amount and click <b>Apply Gold</b>, or use the quick buttons. The table shows every Charsi ware in your save: ranks, gold spent, the next price and the gold to max. \"How much gold for…\" tells you the exact price of any level.": "<b>Złoto i Charsi:</b> wpisz nową kwotę i kliknij <b>Zastosuj złoto</b> albo użyj szybkich przycisków. Tabela pokazuje każdy towar Charsi w Twoim zapisie: rangi, wydane złoto, następną cenę i złoto do maksimum. „Ile złota na…” podaje dokładną cenę dowolnego poziomu.",
+  "<b>Items &amp; Modifiers / Stash:</b> click an item to see its tooltip like in the game, and whether the game sees it as legit. \"Show every stat and its range\" lists each stat with the range the game allows.": "<b>Przedmioty i modyfikatory / Skrzynia:</b> kliknij przedmiot, aby zobaczyć jego opis jak w grze i czy gra uznaje go za legit. „Pokaż każdą statystykę i jej zakres” wypisuje każdą statystykę z zakresem dozwolonym przez grę.",
+  "<b>Reference:</b> every unique, set item and runeword with its ranges. Search by name or by property (\"faster cast\").": "<b>Encyklopedia:</b> każdy unikat, przedmiot z zestawu i słowo runiczne z zakresami. Szukaj po nazwie albo po właściwości („faster cast”).",
+  "<b>Check save:</b> runs the game's own checks on every item and hero build.": "<b>Sprawdź zapis:</b> uruchamia własne sprawdzenia gry dla każdego przedmiotu i buildu bohatera.",
+  "<b>Preview &amp; Export:</b> review the changes, click <b>Generate Save Code</b>, copy the new code and paste it into the game's <b>SAVES</b> menu.": "<b>Podgląd i eksport:</b> przejrzyj zmiany, kliknij <b>Generuj kod zapisu</b>, skopiuj nowy kod i wklej go do menu <b>SAVES</b> w grze.",
+  "Language": "Język",
+  "Click the globe and flag in the top-right corner and pick English, Polski, Deutsch, Français, 한국어 or 简体中文. The page switches at once and remembers the choice. Item, skill and class names stay as the game shows them.": "Kliknij globus i flagę w prawym górnym rogu i wybierz English, Polski, Deutsch, Français, 한국어 albo 简体中文. Strona przełącza się od razu i zapamiętuje wybór. Nazwy przedmiotów, umiejętności i klas zostają takie, jak w grze.",
+  "Update notice": "Informacja o aktualizacji",
+  "The badge at the top shows the newest stable version. The stable version with every feature is free on our Discord; click the badge to join.": "Znaczek u góry pokazuje najnowszą stabilną wersję. Stabilna wersja ze wszystkimi funkcjami jest za darmo na naszym Discordzie; kliknij znaczek, aby dołączyć.",
+  "Your data": "Twoje dane",
+  "Everything runs in your browser: your save is not uploaded anywhere. After every export the editor asks whether you want to share the save with the editor's database; nothing is sent unless you click <b>Yes</b>.": "Wszystko działa w Twojej przeglądarce: Twój zapis nigdzie nie jest wysyłany. Po każdym eksporcie edytor pyta, czy udostępnić zapis bazie danych edytora; nic nie jest wysyłane, dopóki nie klikniesz <b>Tak</b>.",
+  "Good to know": "Dobrze wiedzieć",
+  "The editor is made for offline fun, not for the ladder: the game marks edited saves, and runs with them don't count towards leaderboards.": "Edytor jest do zabawy offline, nie na ladder: gra oznacza edytowane zapisy, a runy nimi nie liczą się do rankingów.",
+  "Re-rolling items": "Przelosowanie przedmiotów",
+  "Setting item values": "Ustawianie wartości przedmiotów",
+  "DESIGN (item pictures)": "WYGLĄD (obrazki przedmiotów)",
+  "Discard every change and go back to the loaded save?": "Odrzucić wszystkie zmiany i wrócić do wczytanego zapisu?",
+  "Nothing was changed. Generate the save code anyway?": "Nic nie zmieniono. Wygenerować kod zapisu mimo to?",
+  "Would you like to submit this generated save to our database to help improve D2 Survivors Save Editor?\n\nData to be submitted:\n• Full generated save code\n• Player nickname read from the save (the actual nickname will not be displayed)\n• Editor version\n• Submission date\n\nSubmission is optional. Choosing No will not affect your save.": "Czy chcesz wysłać ten wygenerowany zapis do naszej bazy danych, żeby pomóc ulepszać D2 Survivors Save Editor?\n\nWysyłane dane:\n• Pełny wygenerowany kod zapisu\n• Nick gracza odczytany z zapisu (sam nick nie będzie wyświetlany)\n• Wersja edytora\n• Data wysłania\n\nWysłanie jest opcjonalne. Wybranie Nie nie wpływa na Twój zapis.",
+  "Thank you! Your save has been submitted to the database.": "Dziękujemy! Twój zapis został wysłany do bazy danych.",
+  "The save was loaded from a save.json file - keep that file as your original.": "Zapis został wczytany z pliku save.json - zachowaj ten plik jako oryginał.",
+  "Unique, set, rare, magic and white items made exactly like the game makes them (they stay legit)": "Unikaty, zestawy, rzadkie, magiczne i białe przedmioty robione dokładnie tak, jak robi je gra (zostają legit)",
+  "Pick the exact rolls you want; rares with up to 6 chosen affixes and an exact affix count": "Wybierz dokładnie te losowania, które chcesz; rzadkie z maks. 6 wybranymi afiksami i dokładną liczbą afiksów",
+  "COPY ITEM: copy any item to any hero's inventory, gear, mercenary or stash, exactly or with a new roll": "KOPIUJ PRZEDMIOT: kopiuj dowolny przedmiot do ekwipunku, na postać, na najemnika lub do skrzyni dowolnego bohatera, dokładnie albo z nowym losowaniem",
+  "DESIGN: pick the picture of rings, amulets and charms": "WYGLĄD: wybierz obrazek pierścieni, amuletów i talizmanów",
+  "Re-roll items you own to the values you want": "Przelosuj swoje przedmioty do wybranych wartości",
+  "Every runeword on every base it can drop on, with the rolls you want": "Każde słowo runiczne na każdej bazie, na której może wypaść, z wybranymi losowaniami",
+  "Small, Large and Grand charms with the prefix and suffix you want": "Small, Large i Grand Charm z wybranym prefiksem i sufiksem",
+  "Grand Charms and skillers made the way the game makes them": "Grand Charmy i skillery robione tak, jak robi je gra",
+  "Change skill levels for every hero": "Zmiana poziomów umiejętności każdego bohatera",
+  "The game's own build check, so builds stay valid": "Kontrola buildu samej gry, więc buildy zostają poprawne",
+  "Search skills by tree, type and name": "Szukaj umiejętności po drzewku, typie i nazwie",
+  "Fill every belt slot with healing, mana or rejuvenation potions": "Wypełnij każdy slot pasa miksturami zdrowia, many albo odmłodzenia",
+  "Set how many of each, within the game's limits": "Ustaw, ile każdej, w limitach gry",
+  "Yes": "Tak",
+  "No": "Nie",
+  "Close": "Zamknij",
+  "Join Discord": "Dołącz do Discorda",
+  "Submission is optional. Choosing No will not affect your save.": "Wysłanie jest opcjonalne. Wybranie Nie nie wpływa na Twój zapis.",
+  "UNREADABLE: the game drops this item when it loads the save ({0})": "NIECZYTELNY: gra usuwa ten przedmiot przy wczytywaniu zapisu ({0})",
+  "NOT LEGIT: {0} (red border in game)": "NOT LEGIT: {0} (czerwona ramka w grze)",
+  "LEGIT: regenerates exactly from its roll": "LEGIT: odtwarza się dokładnie ze swojego losowania",
+  "NOT LEGIT: differs from what its roll makes (red border in game)": "NOT LEGIT: różni się od tego, co daje jego losowanie (czerwona ramka w grze)",
+  "LEGIT: no roll, inside the game's ranges": "LEGIT: bez losowania, w zakresach gry",
+  "Roll: seed {0}": "Losowanie: ziarno {0}",
+  "item level {0}": "poziom przedmiotu {0}",
+  "No roll": "Bez losowania",
+  "Level {0}": "Poziom {0}",
+  "Ethereal": "Eteryczny",
+  "Equipped": "Założone",
+  "Inventory": "Ekwipunek",
+  "Charms": "Talizmany",
+  "Mercenary · {0}": "Najemnik · {0}",
+  "Mercenary · {0} (active)": "Najemnik · {0} (aktywny)",
+  "Shared stash {0}": "Wspólna skrzynia {0}",
+  "Personal stash · {0}": "Skrzynia osobista · {0}",
+  "Uniques tab": "Zakładka unikatów",
+  "inventory {0}": "ekwipunek {0}",
+  "charm {0}": "talizman {0}",
+  "slot {0}": "miejsce {0}",
+  "Paste a save code (it starts with D2S1:) or choose a save file.": "Wklej kod zapisu (zaczyna się od D2S1:) albo wybierz plik zapisu.",
+  "This is not a D2 Survivors save code: it must start with D2S1:": "To nie jest kod zapisu D2 Survivors: musi zaczynać się od D2S1:",
+  "The save could not be read (no version number).": "Nie można odczytać zapisu (brak numeru wersji).",
+  "Gold must be a whole number.": "Złoto musi być liczbą całkowitą.",
+  "Gold cannot be negative.": "Złoto nie może być ujemne.",
+  "{0} is not sold in Hardcore.": "{0} nie jest sprzedawany w Hardcore.",
+  "{0}: the save already has level {1} (of {2}).": "{0}: zapis ma już poziom {1} (z {2}).",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks.": "{0} z poziomu {1} na {2} ({3}): {4} złota. Premia {5} → {6} rang.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. You have enough gold.": "{0} z poziomu {1} na {2} ({3}): {4} złota. Premia {5} → {6} rang. Masz wystarczająco złota.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold.": "{0} z poziomu {1} na {2} ({3}): {4} złota. Premia {5} → {6} rang. Brakuje {7} złota.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold. More than the {8} gold a save can hold: buy it in steps.": "{0} z poziomu {1} na {2} ({3}): {4} złota. Premia {5} → {6} rang. Brakuje {7} złota. To więcej niż {8} złota, które mieści zapis: kupuj etapami.",
+  "normal rank {0}": "zwykła ranga {0}",
+  "extra rank {0}": "dodatkowa ranga {0}",
+  "fixed {0}": "stałe {0}",
+  "unknown": "nieznany",
+  "unique property": "właściwość unikatu",
+  "runeword / rune": "słowo runiczne / runa",
+  "set property": "właściwość zestawu",
+  "prefix": "prefiks",
+  "suffix": "sufiks",
+  "base": "baza",
+  "needs item level {0}+": "wymaga poziomu przedmiotu {0}+",
+  "Bases: {0} ({1} base types)": "Bazy: {0} (typów baz: {1})",
+  "Drops from item level {0}": "Wypada od poziomu przedmiotu {0}",
+  "Base defense {0}-{1}": "Obrona bazowa {0}-{1}",
+  "Required level {0}+": "Wymagany poziom {0}+",
+  "From the runes": "Z run",
+  "From the runes in a weapon": "Z run w broni",
+  "From the runes in a helm or body armor": "Z run w hełmie lub zbroi",
+  "From the runes in a shield": "Z run w tarczy",
+  "With more items of the set worn": "Przy większej liczbie założonych przedmiotów z zestawu",
+  "Gold: {0} → {1}": "Złoto: {0} → {1}",
+  "UNREADABLE": "NIECZYTELNY",
+  "Amazon only": "Tylko Amazon",
+  "Assassin only": "Tylko Assassin",
+  "Barbarian only": "Tylko Barbarian",
+  "Druid only": "Tylko Druid",
+  "Necromancer only": "Tylko Necromancer",
+  "Paladin only": "Tylko Paladin",
+  "Sorceress only": "Tylko Sorceress",
+  "Helms": "Hełmy",
+  "Amulets": "Amulety",
+  "Body Armor": "Zbroje",
+  "Shields": "Tarcze",
+  "Gloves": "Rękawice",
+  "Belts": "Pasy",
+  "Boots": "Buty",
+  "Rings": "Pierścienie",
+  "Axes": "Topory",
+  "Swords": "Miecze",
+  "Maces": "Buzdygany",
+  "Scepters": "Berła",
+  "Daggers": "Sztylety",
+  "Throwing Weapons": "Broń miotana",
+  "Javelins": "Oszczepy",
+  "Spears": "Włócznie",
+  "Polearms": "Broń drzewcowa",
+  "Bows": "Łuki",
+  "Crossbows": "Kusze",
+  "Staves": "Kostury",
+  "Wands": "Różdżki",
+  "Orbs": "Kule",
+  "Katars": "Katary",
+  "Claws": "Szpony",
+  "Runewords": "Słowa runiczne",
+  "Weapons": "Broń"
+ },
+ "de": {
+  "{0} (set I, in hand)": "{0} (Satz I, in der Hand)",
+  "{0} (set II, in hand)": "{0} (Satz II, in der Hand)",
+  "{0} (set I)": "{0} (Satz I)",
+  "{0} (set II)": "{0} (Satz II)",
+  "Put weapons and shields into either weapon set": "Waffen und Schilde in jeden Waffensatz legen",
+  "DEV GENERATION: unique or set items with up to 48 stats of your choice, values 1-1000 (Not legit, for testing builds offline)": "DEV GENERATION: einzigartige und Set-Gegenstände mit bis zu 48 frei gewählten Werten, Werte 1-1000 (Not legit, zum Offline-Testen von Builds)",
+  "Runewords on class bases keep the base's own property, like in the game": "Runenwörter auf Klassenbasen behalten die Eigenschaft der Basis, wie im Spiel",
+  "Load a save, change gold, see Charsi's prices and check every item with the game's own rules, then export.": "Lade einen Spielstand, ändere Gold, sieh Charsis Preise und prüfe jeden Gegenstand mit den Regeln des Spiels, dann exportiere.",
+  "Gold &amp; Charsi, items (view), stash, reference, save check and export work here. Item Generator, Runewords, Charms, Skills, Belt, COPY ITEM and DESIGN are previews — <strong>the full version is free on our Discord.</strong>": "Hier funktionieren Gold &amp; Charsi, Gegenstände (Ansicht), Truhe, Nachschlagewerk, Spielstandprüfung und Export. Gegenstandsgenerator, Runenwörter, Zauber, Fertigkeiten, Gürtel, GEGENSTAND KOPIEREN und AUSSEHEN sind Vorschauen — <strong>die Vollversion gibt es kostenlos auf unserem Discord.</strong>",
+  "GET THE FULL VERSION": "VOLLVERSION HOLEN",
+  "1. Your save": "1. Dein Spielstand",
+  "In the game open <b>SAVES</b>, copy your save code (it starts with <code>D2S1:</code>) and paste it here. You can also load a code saved in a .txt file, or the game's own <code>save.json</code>.": "Öffne im Spiel <b>SAVES</b>, kopiere deinen Speichercode (er beginnt mit <code>D2S1:</code>) und füge ihn hier ein. Du kannst auch einen Code aus einer .txt-Datei laden oder die <code>save.json</code> des Spiels.",
+  "Load Save Code": "Speichercode laden",
+  "Load from File…": "Aus Datei laden…",
+  "Paste Clipboard": "Aus Zwischenablage einfügen",
+  "Clear": "Leeren",
+  "Character & Mercenary": "Charakter & Söldner",
+  "Items & Modifiers": "Gegenstände & Modifikatoren",
+  "Stash": "Truhe",
+  "Reference": "Nachschlagewerk",
+  "Check save": "Spielstand prüfen",
+  "Preview & Export": "Vorschau & Export",
+  "Item Generator": "Gegenstandsgenerator",
+  "Runewords & Charms": "Runenwörter & Zauber",
+  "Skills": "Fertigkeiten",
+  "Belt & Potions": "Gürtel & Tränke",
+  "? HOW TO USE EDITOR": "? SO BENUTZT DU DEN EDITOR",
+  "New amount": "Neuer Betrag",
+  "Apply Gold": "Gold übernehmen",
+  "How much gold for…": "Wie viel Gold für…",
+  "up to level": "bis Stufe",
+  "Calculate": "Berechnen",
+  "Add exactly that much gold": "Genau so viel Gold hinzufügen",
+  "Charsi's wares in this save": "Charsis Waren in diesem Spielstand",
+  "Pick an item on the left.": "Wähle links einen Gegenstand.",
+  "All": "Alle",
+  "Unique": "Einzigartig",
+  "Set item": "Set-Gegenstand",
+  "Runeword": "Runenwort",
+  "All classes": "Alle Klassen",
+  "The game's own checks for every item (readable, legit) and every hero build.": "Die Prüfungen des Spiels für jeden Gegenstand (lesbar, legit) und jeden Helden-Build.",
+  "Changes": "Änderungen",
+  "Generate Save Code": "Speichercode erzeugen",
+  "Reset Changes": "Änderungen zurücksetzen",
+  "New save code": "Neuer Speichercode",
+  "Copy the whole code into the game's <b>SAVES</b> menu. Keep your original code too.": "Kopiere den ganzen Code ins <b>SAVES</b>-Menü des Spiels. Behalte auch deinen ursprünglichen Code.",
+  "Copy Code": "Code kopieren",
+  "Save to File…": "In Datei speichern…",
+  "Save Original to File…": "Original in Datei speichern…",
+  "Join our Discord": "Tritt unserem Discord bei",
+  "The full version is free there: Item Generator, Runewords, Charms, COPY ITEM, Skills and Belt editors. Updates, help and item requests too.": "Dort gibt es die Vollversion kostenlos: Gegenstandsgenerator, Runenwörter, Zauber, GEGENSTAND KOPIEREN, Fertigkeiten- und Gürtel-Editor. Dazu Updates, Hilfe und Gegenstandswünsche.",
+  "Join Discord ↗": "Discord beitreten ↗",
+  "⚠️ LEADERBOARD WARNING: Modified saves may flag your character. Runs made with an edited character will not count toward leaderboards. Keep an untouched backup of your original save.": "⚠️ RANGLISTEN-WARNUNG: Veränderte Spielstände können deinen Charakter markieren. Runs mit einem bearbeiteten Charakter zählen nicht für Ranglisten. Behalte eine unberührte Sicherung deines Original-Spielstands.",
+  "Follow Just a Polish Guy": "Folge Just a Polish Guy",
+  "Community & support": "Community & Hilfe",
+  "Tutorials & videos": "Anleitungen & Videos",
+  "Projects & code": "Projekte & Code",
+  "Follow the project": "Folge dem Projekt",
+  "Created by Just a Polish Guy · D2 Survivors Save Editor · an independent community project, not affiliated with the game's developers": "Erstellt von Just a Polish Guy · D2 Survivors Save Editor · ein unabhängiges Community-Projekt, nicht mit den Entwicklern des Spiels verbunden",
+  "Search names or properties, e.g. faster cast": "Namen oder Eigenschaften suchen, z. B. faster cast",
+  "Full version only": "Nur in der Vollversion",
+  "{0} is in the full version of the editor.\n\nThe full version is FREE on our Discord: {1}": "{0} gibt es in der Vollversion des Editors.\n\nDie Vollversion ist KOSTENLOS auf unserem Discord: {1}",
+  "Loading the game's rules (first visit downloads about 12 MB, then it is cached)…": "Die Spielregeln werden geladen (beim ersten Besuch etwa 12 MB, danach im Cache)…",
+  "Loading the editor's game data…": "Spieldaten des Editors werden geladen…",
+  "The editor could not start: {0}. Refresh the page; if it keeps happening, tell us on Discord.": "Der Editor konnte nicht starten: {0}. Lade die Seite neu; wenn es immer wieder passiert, sag uns auf Discord Bescheid.",
+  "Ready. Paste your save code and click Load Save Code.": "Bereit. Füge deinen Speichercode ein und klicke auf Speichercode laden.",
+  "Checking for updates…": "Suche nach Updates…",
+  "YOU HAVE v{0} (WEB) · STABLE v{1} IS AVAILABLE ON DISCORD · CLICK TO JOIN": "DU HAST v{0} (WEB) · STABILE v{1} AUF DISCORD · KLICKEN ZUM BEITRETEN",
+  "YOU HAVE v{0} (WEB) · THE FULL STABLE VERSION IS FREE ON DISCORD · CLICK TO JOIN": "DU HAST v{0} (WEB) · DIE STABILE VOLLVERSION GIBT ES KOSTENLOS AUF DISCORD · KLICKEN ZUM BEITRETEN",
+  "Save loaded: {0}, {1} hero(es), {2} items, {3} gold.": "Spielstand geladen: {0}, {1} Held(en), {2} Gegenstände, {3} Gold.",
+  "The game has already marked this save as edited.": "Das Spiel hat diesen Spielstand bereits als bearbeitet markiert.",
+  "Could not load the save: {0}": "Spielstand konnte nicht geladen werden: {0}",
+  "The browser did not allow reading the clipboard. Paste with Ctrl+V into the box instead.": "Der Browser hat das Lesen der Zwischenablage nicht erlaubt. Füge den Code mit Strg+V ins Feld ein.",
+  "Hero:": "Held:",
+  "lvl {0}": "Stufe {0}",
+  "No hero in this save yet.": "In diesem Spielstand gibt es noch keinen Helden.",
+  "(active)": "(aktiv)",
+  "{0} item(s) worn": "{0} Gegenstand/Gegenstände angelegt",
+  "skills:": "Fertigkeiten:",
+  "No mercenary hired.": "Kein Söldner angeheuert.",
+  "No skills picked yet.": "Noch keine Fertigkeiten gewählt.",
+  "Level": "Stufe",
+  "Difficulty": "Schwierigkeit",
+  "act {0}": "Akt {0}",
+  "State": "Zustand",
+  "Items": "Gegenstände",
+  "{0} equipped · {1} in inventory · {2} charms": "{0} angelegt · {1} im Inventar · {2} Zauber",
+  "Mercenary": "Söldner",
+  "Editing skills": "Fertigkeiten bearbeiten",
+  "Edit skills": "Fertigkeiten bearbeiten",
+  "Editing the belt and potions": "Gürtel und Tränke bearbeiten",
+  "Edit belt": "Gürtel bearbeiten",
+  "The game accepts up to {0} gold.": "Das Spiel akzeptiert bis zu {0} Gold.",
+  "Gold set to {0}. Open Preview & Export to make the new save code.": "Gold auf {0} gesetzt. Öffne Vorschau & Export, um den neuen Speichercode zu erzeugen.",
+  "Gold in the save: {0}": "Gold im Spielstand: {0}",
+  "Rank": "Rang",
+  "Extra ranks": "Extra-Ränge",
+  "Bonus now (ranks)": "Bonus jetzt (Ränge)",
+  "Gold spent": "Ausgegebenes Gold",
+  "Next level costs": "Nächste Stufe kostet",
+  "Gold to max": "Gold bis Maximum",
+  "Each rank gives": "Jeder Rang gibt",
+  "not in Hardcore": "nicht im Hardcore",
+  "maxed": "maximal",
+  "(less each rank)": "(weniger mit jedem Rang)",
+  "Spent at Charsi so far: {0} gold · To max every ware: {1} gold · Gold now: {2} ({3}% of that)": "Bisher bei Charsi ausgegeben: {0} Gold · Bis alle Waren maximal: {1} Gold · Gold jetzt: {2} ({3}% davon)",
+  "Spent at Charsi so far: {0} gold · every ware is maxed": "Bisher bei Charsi ausgegeben: {0} Gold · alle Waren sind maximal",
+  "Type a level.": "Gib eine Stufe ein.",
+  "Empty.": "Leer.",
+  "Pick an item on the left. A green dot means the game sees it as legit, red means it does not.": "Wähle links einen Gegenstand. Ein grüner Punkt heißt, das Spiel sieht ihn als legit, ein roter, dass nicht.",
+  "Show every stat and its range": "Jeden Wert und seinen Bereich zeigen",
+  "Re-roll to wanted values": "Neu würfeln auf Wunschwerte",
+  "Set values directly": "Werte direkt setzen",
+  "COPY ITEM": "GEGENSTAND KOPIEREN",
+  "DESIGN": "AUSSEHEN",
+  "Stat in save": "Wert im Spielstand",
+  "Shown in game as": "Im Spiel angezeigt als",
+  "Value": "Wert",
+  "Game range": "Bereich im Spiel",
+  "Source": "Quelle",
+  "Every unique, set item and runeword in the game, with what it can roll. From the game's own tables ({0}).": "Jeder Unique- und Set-Gegenstand und jedes Runenwort im Spiel, mit dem, was er würfeln kann. Aus den Tabellen des Spiels ({0}).",
+  "{0} item(s)": "{0} Gegenstand/Gegenstände",
+  "set": "Set",
+  "runeword": "Runenwort",
+  "Making items in the Item Generator": "Gegenstände im Gegenstandsgenerator erstellen",
+  "Make this item": "Diesen Gegenstand erstellen",
+  "Checking every item with the game's rules…": "Jeder Gegenstand wird mit den Regeln des Spiels geprüft…",
+  "Items checked with the game's own rules ({0}):": "Gegenstände nach den Regeln des Spiels geprüft ({0}):",
+  "{0} to review": "{0} zu prüfen",
+  "{0} regenerate exactly from their roll; {1} have no roll and pass the game's range rules.": "{0} regenerieren exakt aus ihrem Wurf; {1} haben keinen Wurf und bestehen die Bereichsregeln des Spiels.",
+  "UNREADABLE: the game drops this item when it loads the save. NOT LEGIT: the game shows a red \"Not legit\" border; worn, it keeps runs off the ladder.": "UNLESBAR: das Spiel entfernt diesen Gegenstand beim Laden des Spielstands. NOT LEGIT: das Spiel zeigt einen roten „Not legit“-Rahmen; angelegt hält er Runs von der Ladder fern.",
+  "Result": "Ergebnis",
+  "Where": "Wo",
+  "Item": "Gegenstand",
+  "Why": "Warum",
+  "Hero builds": "Helden-Builds",
+  "All hero builds pass the game's build check.": "Alle Helden-Builds bestehen die Build-Prüfung des Spiels.",
+  "Gold is over the game's limit of {0}.": "Das Gold liegt über dem Limit des Spiels von {0}.",
+  "No changes yet. Change the gold in Gold & Charsi first.": "Noch keine Änderungen. Ändere zuerst das Gold unter Gold & Charsi.",
+  "Changes discarded.": "Änderungen verworfen.",
+  "No changes": "Keine Änderungen",
+  "Hero build check": "Build-Prüfung der Helden",
+  "The game's build check rejects these hero builds (the game reports them and keeps the save off the leaderboard):": "Die Build-Prüfung des Spiels lehnt diese Helden-Builds ab (das Spiel meldet sie und hält den Spielstand aus der Rangliste heraus):",
+  "Export anyway?": "Trotzdem exportieren?",
+  "Items the game cannot read": "Gegenstände, die das Spiel nicht lesen kann",
+  "The game will DROP these items when it loads the save:": "Das Spiel ENTFERNT diese Gegenstände beim Laden des Spielstands:",
+  "New save code generated. Copy it into the game's SAVES menu.": "Neuer Speichercode erzeugt. Kopiere ihn ins SAVES-Menü des Spiels.",
+  "Share Generated Save?": "Erzeugten Spielstand teilen?",
+  "Save Submitted": "Spielstand gesendet",
+  "Save Submission Failed": "Senden des Spielstands fehlgeschlagen",
+  "Your save was generated and can still be used normally. Uploading it to the database failed.": "Dein Spielstand wurde erzeugt und kann normal verwendet werden. Das Hochladen in die Datenbank ist fehlgeschlagen.",
+  "Could not generate the save: {0}": "Spielstand konnte nicht erzeugt werden: {0}",
+  "Copied. Paste it into the game's SAVES menu.": "Kopiert. Füge ihn ins SAVES-Menü des Spiels ein.",
+  "Copied.": "Kopiert.",
+  "full version": "Vollversion",
+  "Preview of what the full editor does:": "Vorschau dessen, was der volle Editor kann:",
+  "The full version is free on our Discord, together with updates, help and item requests.": "Die Vollversion gibt es kostenlos auf unserem Discord, zusammen mit Updates, Hilfe und Gegenstandswünschen.",
+  "GET THE FULL VERSION ON DISCORD": "VOLLVERSION AUF DISCORD HOLEN",
+  "How to use the web editor": "So benutzt du den Web-Editor",
+  "<b>Load your save.</b> In the game open <b>SAVES</b>, copy the code (starts with <code>D2S1:</code>), paste it at the top and click <b>Load Save Code</b>. Keep the original code somewhere safe.": "<b>Lade deinen Spielstand.</b> Öffne im Spiel <b>SAVES</b>, kopiere den Code (beginnt mit <code>D2S1:</code>), füge ihn oben ein und klicke auf <b>Speichercode laden</b>. Bewahre den Original-Code sicher auf.",
+  "<b>Pick a hero</b> in the bar above the tabs. Character &amp; Mercenary shows the level, skills and mercenary.": "<b>Wähle einen Helden</b> in der Leiste über den Tabs. Charakter &amp; Söldner zeigt Stufe, Fertigkeiten und Söldner.",
+  "<b>Gold &amp; Charsi:</b> type a new amount and click <b>Apply Gold</b>, or use the quick buttons. The table shows every Charsi ware in your save: ranks, gold spent, the next price and the gold to max. \"How much gold for…\" tells you the exact price of any level.": "<b>Gold &amp; Charsi:</b> gib einen neuen Betrag ein und klicke auf <b>Gold übernehmen</b>, oder nutze die Schnellknöpfe. Die Tabelle zeigt jede Charsi-Ware in deinem Spielstand: Ränge, ausgegebenes Gold, den nächsten Preis und das Gold bis zum Maximum. „Wie viel Gold für…“ nennt dir den genauen Preis jeder Stufe.",
+  "<b>Items &amp; Modifiers / Stash:</b> click an item to see its tooltip like in the game, and whether the game sees it as legit. \"Show every stat and its range\" lists each stat with the range the game allows.": "<b>Gegenstände &amp; Modifikatoren / Truhe:</b> klicke auf einen Gegenstand, um seinen Tooltip wie im Spiel zu sehen und ob das Spiel ihn als legit sieht. „Jeden Wert und seinen Bereich zeigen“ listet jeden Wert mit dem Bereich, den das Spiel erlaubt.",
+  "<b>Reference:</b> every unique, set item and runeword with its ranges. Search by name or by property (\"faster cast\").": "<b>Nachschlagewerk:</b> jeder Unique- und Set-Gegenstand und jedes Runenwort mit seinen Bereichen. Suche nach Namen oder Eigenschaft („faster cast“).",
+  "<b>Check save:</b> runs the game's own checks on every item and hero build.": "<b>Spielstand prüfen:</b> führt die Prüfungen des Spiels für jeden Gegenstand und jeden Helden-Build aus.",
+  "<b>Preview &amp; Export:</b> review the changes, click <b>Generate Save Code</b>, copy the new code and paste it into the game's <b>SAVES</b> menu.": "<b>Vorschau &amp; Export:</b> prüfe die Änderungen, klicke auf <b>Speichercode erzeugen</b>, kopiere den neuen Code und füge ihn ins <b>SAVES</b>-Menü des Spiels ein.",
+  "Language": "Sprache",
+  "Click the globe and flag in the top-right corner and pick English, Polski, Deutsch, Français, 한국어 or 简体中文. The page switches at once and remembers the choice. Item, skill and class names stay as the game shows them.": "Klicke oben rechts auf Globus und Flagge und wähle English, Polski, Deutsch, Français, 한국어 oder 简体中文. Die Seite wechselt sofort und merkt sich die Wahl. Namen von Gegenständen, Fertigkeiten und Klassen bleiben so, wie das Spiel sie zeigt.",
+  "Update notice": "Update-Hinweis",
+  "The badge at the top shows the newest stable version. The stable version with every feature is free on our Discord; click the badge to join.": "Das Abzeichen oben zeigt die neueste stabile Version. Die stabile Version mit allen Funktionen gibt es kostenlos auf unserem Discord; klicke auf das Abzeichen, um beizutreten.",
+  "Your data": "Deine Daten",
+  "Everything runs in your browser: your save is not uploaded anywhere. After every export the editor asks whether you want to share the save with the editor's database; nothing is sent unless you click <b>Yes</b>.": "Alles läuft in deinem Browser: dein Spielstand wird nirgendwo hochgeladen. Nach jedem Export fragt der Editor, ob du den Spielstand mit der Datenbank des Editors teilen willst; nichts wird gesendet, außer du klickst auf <b>Ja</b>.",
+  "Good to know": "Gut zu wissen",
+  "The editor is made for offline fun, not for the ladder: the game marks edited saves, and runs with them don't count towards leaderboards.": "Der Editor ist für Offline-Spaß gemacht, nicht für die Ladder: das Spiel markiert bearbeitete Spielstände, und Runs damit zählen nicht für Ranglisten.",
+  "Re-rolling items": "Gegenstände neu würfeln",
+  "Setting item values": "Gegenstandswerte setzen",
+  "DESIGN (item pictures)": "AUSSEHEN (Gegenstandsbilder)",
+  "Discard every change and go back to the loaded save?": "Alle Änderungen verwerfen und zum geladenen Spielstand zurückkehren?",
+  "Nothing was changed. Generate the save code anyway?": "Nichts wurde geändert. Den Speichercode trotzdem erzeugen?",
+  "Would you like to submit this generated save to our database to help improve D2 Survivors Save Editor?\n\nData to be submitted:\n• Full generated save code\n• Player nickname read from the save (the actual nickname will not be displayed)\n• Editor version\n• Submission date\n\nSubmission is optional. Choosing No will not affect your save.": "Möchtest du diesen erzeugten Spielstand an unsere Datenbank senden, um den D2 Survivors Save Editor zu verbessern?\n\nGesendete Daten:\n• Vollständiger erzeugter Speichercode\n• Spielername aus dem Spielstand (der Name selbst wird nicht angezeigt)\n• Editor-Version\n• Sendedatum\n\nDas Senden ist freiwillig. Nein hat keinen Einfluss auf deinen Spielstand.",
+  "Thank you! Your save has been submitted to the database.": "Danke! Dein Spielstand wurde an die Datenbank gesendet.",
+  "The save was loaded from a save.json file - keep that file as your original.": "Der Spielstand wurde aus einer save.json geladen - behalte diese Datei als Original.",
+  "Unique, set, rare, magic and white items made exactly like the game makes them (they stay legit)": "Unique-, Set-, seltene, magische und weiße Gegenstände, genau so erzeugt wie im Spiel (sie bleiben legit)",
+  "Pick the exact rolls you want; rares with up to 6 chosen affixes and an exact affix count": "Wähle genau die Würfe, die du willst; seltene mit bis zu 6 gewählten Affixen und exakter Affix-Anzahl",
+  "COPY ITEM: copy any item to any hero's inventory, gear, mercenary or stash, exactly or with a new roll": "GEGENSTAND KOPIEREN: kopiere jeden Gegenstand in Inventar, Ausrüstung, Söldner oder Truhe jedes Helden, exakt oder mit neuem Wurf",
+  "DESIGN: pick the picture of rings, amulets and charms": "AUSSEHEN: wähle das Bild von Ringen, Amuletten und Zaubern",
+  "Re-roll items you own to the values you want": "Würfle deine Gegenstände auf die Werte, die du willst",
+  "Every runeword on every base it can drop on, with the rolls you want": "Jedes Runenwort auf jeder Basis, auf der es fallen kann, mit den gewünschten Würfen",
+  "Small, Large and Grand charms with the prefix and suffix you want": "Small, Large und Grand Charms mit dem gewünschten Präfix und Suffix",
+  "Grand Charms and skillers made the way the game makes them": "Grand Charms und Skiller so erzeugt, wie das Spiel sie erzeugt",
+  "Change skill levels for every hero": "Fertigkeitsstufen jedes Helden ändern",
+  "The game's own build check, so builds stay valid": "Die Build-Prüfung des Spiels, damit Builds gültig bleiben",
+  "Search skills by tree, type and name": "Fertigkeiten nach Baum, Typ und Name suchen",
+  "Fill every belt slot with healing, mana or rejuvenation potions": "Fülle jeden Gürtelplatz mit Heil-, Mana- oder Verjüngungstränken",
+  "Set how many of each, within the game's limits": "Lege fest, wie viele von jedem, innerhalb der Grenzen des Spiels",
+  "Yes": "Ja",
+  "No": "Nein",
+  "Close": "Schließen",
+  "Join Discord": "Discord beitreten",
+  "Submission is optional. Choosing No will not affect your save.": "Das Senden ist freiwillig. Nein hat keinen Einfluss auf deinen Spielstand.",
+  "UNREADABLE: the game drops this item when it loads the save ({0})": "UNLESBAR: das Spiel entfernt diesen Gegenstand beim Laden des Spielstands ({0})",
+  "NOT LEGIT: {0} (red border in game)": "NOT LEGIT: {0} (roter Rahmen im Spiel)",
+  "LEGIT: regenerates exactly from its roll": "LEGIT: regeneriert exakt aus seinem Wurf",
+  "NOT LEGIT: differs from what its roll makes (red border in game)": "NOT LEGIT: weicht von dem ab, was sein Wurf ergibt (roter Rahmen im Spiel)",
+  "LEGIT: no roll, inside the game's ranges": "LEGIT: kein Wurf, innerhalb der Bereiche des Spiels",
+  "Roll: seed {0}": "Wurf: Seed {0}",
+  "item level {0}": "Gegenstandsstufe {0}",
+  "No roll": "Kein Wurf",
+  "Level {0}": "Stufe {0}",
+  "Ethereal": "Ätherisch",
+  "Equipped": "Angelegt",
+  "Inventory": "Inventar",
+  "Charms": "Zauber",
+  "Mercenary · {0}": "Söldner · {0}",
+  "Mercenary · {0} (active)": "Söldner · {0} (aktiv)",
+  "Shared stash {0}": "Geteilte Truhe {0}",
+  "Personal stash · {0}": "Persönliche Truhe · {0}",
+  "Uniques tab": "Uniques-Tab",
+  "inventory {0}": "Inventar {0}",
+  "charm {0}": "Zauber {0}",
+  "slot {0}": "Platz {0}",
+  "Paste a save code (it starts with D2S1:) or choose a save file.": "Füge einen Speichercode ein (er beginnt mit D2S1:) oder wähle eine Spielstand-Datei.",
+  "This is not a D2 Survivors save code: it must start with D2S1:": "Das ist kein Speichercode von D2 Survivors: er muss mit D2S1: beginnen",
+  "The save could not be read (no version number).": "Der Spielstand konnte nicht gelesen werden (keine Versionsnummer).",
+  "Gold must be a whole number.": "Gold muss eine ganze Zahl sein.",
+  "Gold cannot be negative.": "Gold darf nicht negativ sein.",
+  "{0} is not sold in Hardcore.": "{0} wird im Hardcore nicht verkauft.",
+  "{0}: the save already has level {1} (of {2}).": "{0}: der Spielstand hat bereits Stufe {1} (von {2}).",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks.": "{0} von Stufe {1} auf {2} ({3}): {4} Gold. Bonus {5} → {6} Ränge.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. You have enough gold.": "{0} von Stufe {1} auf {2} ({3}): {4} Gold. Bonus {5} → {6} Ränge. Du hast genug Gold.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold.": "{0} von Stufe {1} auf {2} ({3}): {4} Gold. Bonus {5} → {6} Ränge. Es fehlen {7} Gold.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold. More than the {8} gold a save can hold: buy it in steps.": "{0} von Stufe {1} auf {2} ({3}): {4} Gold. Bonus {5} → {6} Ränge. Es fehlen {7} Gold. Mehr als die {8} Gold, die ein Spielstand halten kann: kaufe es in Schritten.",
+  "normal rank {0}": "normaler Rang {0}",
+  "extra rank {0}": "Extra-Rang {0}",
+  "fixed {0}": "fest {0}",
+  "unknown": "unbekannt",
+  "unique property": "Unique-Eigenschaft",
+  "runeword / rune": "Runenwort / Rune",
+  "set property": "Set-Eigenschaft",
+  "prefix": "Präfix",
+  "suffix": "Suffix",
+  "automagic": "Automagic",
+  "base": "Basis",
+  "needs item level {0}+": "braucht Gegenstandsstufe {0}+",
+  "Bases: {0} ({1} base types)": "Basen: {0} ({1} Basistypen)",
+  "Drops from item level {0}": "Fällt ab Gegenstandsstufe {0}",
+  "Base defense {0}-{1}": "Basisverteidigung {0}-{1}",
+  "Required level {0}+": "Benötigte Stufe {0}+",
+  "From the runes": "Aus den Runen",
+  "From the runes in a weapon": "Aus den Runen in einer Waffe",
+  "From the runes in a helm or body armor": "Aus den Runen in Helm oder Rüstung",
+  "From the runes in a shield": "Aus den Runen in einem Schild",
+  "With more items of the set worn": "Mit mehr angelegten Gegenständen des Sets",
+  "UNREADABLE": "UNLESBAR",
+  "Amazon only": "Nur Amazon",
+  "Assassin only": "Nur Assassin",
+  "Barbarian only": "Nur Barbarian",
+  "Druid only": "Nur Druid",
+  "Necromancer only": "Nur Necromancer",
+  "Paladin only": "Nur Paladin",
+  "Sorceress only": "Nur Sorceress",
+  "Helms": "Helme",
+  "Amulets": "Amulette",
+  "Body Armor": "Rüstungen",
+  "Shields": "Schilde",
+  "Gloves": "Handschuhe",
+  "Belts": "Gürtel",
+  "Boots": "Stiefel",
+  "Rings": "Ringe",
+  "Axes": "Äxte",
+  "Swords": "Schwerter",
+  "Maces": "Streitkolben",
+  "Scepters": "Zepter",
+  "Daggers": "Dolche",
+  "Throwing Weapons": "Wurfwaffen",
+  "Javelins": "Wurfspeere",
+  "Spears": "Speere",
+  "Polearms": "Stangenwaffen",
+  "Bows": "Bögen",
+  "Crossbows": "Armbrüste",
+  "Staves": "Stäbe",
+  "Wands": "Zauberstäbe",
+  "Orbs": "Kugeln",
+  "Katars": "Katare",
+  "Claws": "Klauen",
+  "Runewords": "Runenwörter",
+  "Weapons": "Waffen"
+ },
+ "fr": {
+  "{0} (set I, in hand)": "{0} (set I, en main)",
+  "{0} (set II, in hand)": "{0} (set II, en main)",
+  "{0} (set I)": "{0} (set I)",
+  "{0} (set II)": "{0} (set II)",
+  "Put weapons and shields into either weapon set": "Placer armes et boucliers dans l'un ou l'autre set d'armes",
+  "DEV GENERATION: unique or set items with up to 48 stats of your choice, values 1-1000 (Not legit, for testing builds offline)": "DEV GENERATION : objets uniques ou d'ensemble avec jusqu'à 48 stats de votre choix, valeurs 1-1000 (Not legit, pour tester des builds hors ligne)",
+  "Runewords on class bases keep the base's own property, like in the game": "Les mots runiques sur des bases de classe gardent la propriété de la base, comme dans le jeu",
+  "Load a save, change gold, see Charsi's prices and check every item with the game's own rules, then export.": "Chargez une sauvegarde, changez l'or, voyez les prix de Charsi et vérifiez chaque objet avec les règles du jeu, puis exportez.",
+  "Gold &amp; Charsi, items (view), stash, reference, save check and export work here. Item Generator, Runewords, Charms, Skills, Belt, COPY ITEM and DESIGN are previews — <strong>the full version is free on our Discord.</strong>": "Ici fonctionnent Or et Charsi, objets (lecture), coffre, référence, vérification de la sauvegarde et export. Générateur d'objets, Mots runiques, Charmes, Compétences, Ceinture, COPIER L'OBJET et APPARENCE sont des aperçus — <strong>la version complète est gratuite sur notre Discord.</strong>",
+  "GET THE FULL VERSION": "OBTENIR LA VERSION COMPLÈTE",
+  "1. Your save": "1. Votre sauvegarde",
+  "In the game open <b>SAVES</b>, copy your save code (it starts with <code>D2S1:</code>) and paste it here. You can also load a code saved in a .txt file, or the game's own <code>save.json</code>.": "Dans le jeu, ouvrez <b>SAVES</b>, copiez votre code de sauvegarde (il commence par <code>D2S1:</code>) et collez-le ici. Vous pouvez aussi charger un code enregistré dans un fichier .txt, ou le fichier <code>save.json</code> du jeu.",
+  "Load Save Code": "Charger le code",
+  "Load from File…": "Charger un fichier…",
+  "Paste Clipboard": "Coller le presse-papiers",
+  "Clear": "Effacer",
+  "Character & Mercenary": "Personnage et mercenaire",
+  "Gold & Charsi": "Or et Charsi",
+  "Items & Modifiers": "Objets et modificateurs",
+  "Stash": "Coffre",
+  "Reference": "Référence",
+  "Check save": "Vérifier la sauvegarde",
+  "Preview & Export": "Aperçu et export",
+  "Item Generator": "Générateur d'objets",
+  "Runewords & Charms": "Mots runiques et Charmes",
+  "Skills": "Compétences",
+  "Belt & Potions": "Ceinture et potions",
+  "? HOW TO USE EDITOR": "? MODE D'EMPLOI DE L'ÉDITEUR",
+  "Gold": "Or",
+  "New amount": "Nouveau montant",
+  "Apply Gold": "Appliquer l'or",
+  "How much gold for…": "Combien d'or pour…",
+  "Ware": "Marchandise",
+  "up to level": "jusqu'au niveau",
+  "Calculate": "Calculer",
+  "Add exactly that much gold": "Ajouter exactement cet or",
+  "Charsi's wares in this save": "Marchandises de Charsi dans cette sauvegarde",
+  "Pick an item on the left.": "Choisissez un objet à gauche.",
+  "All": "Tous",
+  "Set item": "Objet d'ensemble",
+  "Runeword": "Mot runique",
+  "All classes": "Toutes les classes",
+  "The game's own checks for every item (readable, legit) and every hero build.": "Les vérifications du jeu pour chaque objet (lisible, legit) et chaque build de héros.",
+  "Changes": "Modifications",
+  "Generate Save Code": "Générer le code de sauvegarde",
+  "Reset Changes": "Annuler les modifications",
+  "New save code": "Nouveau code de sauvegarde",
+  "Copy the whole code into the game's <b>SAVES</b> menu. Keep your original code too.": "Copiez tout le code dans le menu <b>SAVES</b> du jeu. Gardez aussi votre code d'origine.",
+  "Copy Code": "Copier le code",
+  "Save to File…": "Enregistrer dans un fichier…",
+  "Save Original to File…": "Enregistrer l'original dans un fichier…",
+  "Join our Discord": "Rejoignez notre Discord",
+  "The full version is free there: Item Generator, Runewords, Charms, COPY ITEM, Skills and Belt editors. Updates, help and item requests too.": "La version complète y est gratuite : Générateur d'objets, Mots runiques, Charmes, COPIER L'OBJET, éditeurs de Compétences et de Ceinture. Avec les mises à jour, l'aide et les demandes d'objets.",
+  "Join Discord ↗": "Rejoindre Discord ↗",
+  "⚠️ LEADERBOARD WARNING: Modified saves may flag your character. Runs made with an edited character will not count toward leaderboards. Keep an untouched backup of your original save.": "⚠️ AVERTISSEMENT CLASSEMENT : les sauvegardes modifiées peuvent signaler votre personnage. Les parties jouées avec un personnage modifié ne comptent pas pour les classements. Gardez une copie intacte de votre sauvegarde d'origine.",
+  "Follow Just a Polish Guy": "Suivez Just a Polish Guy",
+  "Community & support": "Communauté et aide",
+  "Tutorials & videos": "Tutoriels et vidéos",
+  "Projects & code": "Projets et code",
+  "Follow the project": "Suivre le projet",
+  "Created by Just a Polish Guy · D2 Survivors Save Editor · an independent community project, not affiliated with the game's developers": "Créé par Just a Polish Guy · D2 Survivors Save Editor · un projet communautaire indépendant, sans lien avec les développeurs du jeu",
+  "Search names or properties, e.g. faster cast": "Rechercher des noms ou propriétés, p. ex. faster cast",
+  "Gold: {0}": "Or : {0}",
+  "Full version only": "Version complète uniquement",
+  "{0} is in the full version of the editor.\n\nThe full version is FREE on our Discord: {1}": "{0} est dans la version complète de l'éditeur.\n\nLa version complète est GRATUITE sur notre Discord : {1}",
+  "Loading the game's rules (first visit downloads about 12 MB, then it is cached)…": "Chargement des règles du jeu (la première visite télécharge environ 12 Mo, ensuite c'est en cache)…",
+  "Loading the editor's game data…": "Chargement des données de jeu de l'éditeur…",
+  "The editor could not start: {0}. Refresh the page; if it keeps happening, tell us on Discord.": "L'éditeur n'a pas pu démarrer : {0}. Actualisez la page ; si cela se répète, dites-le-nous sur Discord.",
+  "Ready. Paste your save code and click Load Save Code.": "Prêt. Collez votre code de sauvegarde et cliquez sur Charger le code.",
+  "Checking for updates…": "Recherche de mises à jour…",
+  "YOU HAVE v{0} (WEB) · STABLE v{1} IS AVAILABLE ON DISCORD · CLICK TO JOIN": "VOUS AVEZ v{0} (WEB) · STABLE v{1} SUR DISCORD · CLIQUEZ POUR REJOINDRE",
+  "YOU HAVE v{0} (WEB) · THE FULL STABLE VERSION IS FREE ON DISCORD · CLICK TO JOIN": "VOUS AVEZ v{0} (WEB) · LA VERSION STABLE COMPLÈTE EST GRATUITE SUR DISCORD · CLIQUEZ POUR REJOINDRE",
+  "Save loaded: {0}, {1} hero(es), {2} items, {3} gold.": "Sauvegarde chargée : {0}, {1} héros, {2} objets, {3} or.",
+  "The game has already marked this save as edited.": "Le jeu a déjà marqué cette sauvegarde comme modifiée.",
+  "Could not load the save: {0}": "Impossible de charger la sauvegarde : {0}",
+  "The browser did not allow reading the clipboard. Paste with Ctrl+V into the box instead.": "Le navigateur n'a pas autorisé la lecture du presse-papiers. Collez avec Ctrl+V dans la zone.",
+  "Hero:": "Héros :",
+  "lvl {0}": "niv. {0}",
+  "No hero in this save yet.": "Pas encore de héros dans cette sauvegarde.",
+  "(active)": "(actif)",
+  "{0} item(s) worn": "{0} objet(s) porté(s)",
+  "skills:": "compétences :",
+  "No mercenary hired.": "Aucun mercenaire engagé.",
+  "No skills picked yet.": "Aucune compétence choisie pour l'instant.",
+  "Level": "Niveau",
+  "Difficulty": "Difficulté",
+  "act {0}": "acte {0}",
+  "State": "État",
+  "Items": "Objets",
+  "{0} equipped · {1} in inventory · {2} charms": "{0} équipé(s) · {1} dans l'inventaire · {2} charmes",
+  "Mercenary": "Mercenaire",
+  "Editing skills": "Modifier les compétences",
+  "Edit skills": "Modifier les compétences",
+  "Editing the belt and potions": "Modifier la ceinture et les potions",
+  "Edit belt": "Modifier la ceinture",
+  "The game accepts up to {0} gold.": "Le jeu accepte jusqu'à {0} pièces d'or.",
+  "Gold set to {0}. Open Preview & Export to make the new save code.": "Or réglé sur {0}. Ouvrez Aperçu et export pour créer le nouveau code de sauvegarde.",
+  "Gold in the save: {0}": "Or dans la sauvegarde : {0}",
+  "Rank": "Rang",
+  "Extra ranks": "Rangs supplémentaires",
+  "Bonus now (ranks)": "Bonus actuel (rangs)",
+  "Gold spent": "Or dépensé",
+  "Next level costs": "Coût du niveau suivant",
+  "Gold to max": "Or jusqu'au max",
+  "Each rank gives": "Chaque rang donne",
+  "not in Hardcore": "absent en Hardcore",
+  "maxed": "au max",
+  "extra:": "en plus :",
+  "(less each rank)": "(moins à chaque rang)",
+  "Spent at Charsi so far: {0} gold · To max every ware: {1} gold · Gold now: {2} ({3}% of that)": "Dépensé chez Charsi jusqu'ici : {0} or · Pour tout monter au max : {1} or · Or actuel : {2} ({3}% de cela)",
+  "Spent at Charsi so far: {0} gold · every ware is maxed": "Dépensé chez Charsi jusqu'ici : {0} or · toutes les marchandises sont au max",
+  "Type a level.": "Entrez un niveau.",
+  "Empty.": "Vide.",
+  "Pick an item on the left. A green dot means the game sees it as legit, red means it does not.": "Choisissez un objet à gauche. Un point vert signifie que le jeu le considère comme legit, un rouge que non.",
+  "Show every stat and its range": "Afficher chaque statistique et sa plage",
+  "Re-roll to wanted values": "Relancer vers les valeurs voulues",
+  "Set values directly": "Définir les valeurs directement",
+  "COPY ITEM": "COPIER L'OBJET",
+  "DESIGN": "APPARENCE",
+  "Stat in save": "Statistique enregistrée",
+  "Shown in game as": "Affiché en jeu",
+  "Value": "Valeur",
+  "Game range": "Plage du jeu",
+  "Source": "Origine",
+  "Every unique, set item and runeword in the game, with what it can roll. From the game's own tables ({0}).": "Chaque objet unique, objet d'ensemble et mot runique du jeu, avec ce qu'il peut tirer. Tiré des tables du jeu ({0}).",
+  "{0} item(s)": "{0} objet(s)",
+  "set": "ensemble",
+  "runeword": "mot runique",
+  "Making items in the Item Generator": "Créer des objets dans le Générateur d'objets",
+  "Make this item": "Créer cet objet",
+  "Checking every item with the game's rules…": "Vérification de chaque objet avec les règles du jeu…",
+  "Items checked with the game's own rules ({0}):": "Objets vérifiés avec les règles du jeu ({0}) :",
+  "{0} to review": "{0} à examiner",
+  "{0} regenerate exactly from their roll; {1} have no roll and pass the game's range rules.": "{0} se régénèrent exactement depuis leur tirage ; {1} n'ont pas de tirage et respectent les plages du jeu.",
+  "UNREADABLE: the game drops this item when it loads the save. NOT LEGIT: the game shows a red \"Not legit\" border; worn, it keeps runs off the ladder.": "ILLISIBLE : le jeu supprime cet objet au chargement de la sauvegarde. NOT LEGIT : le jeu affiche une bordure rouge « Not legit » ; porté, l'objet exclut les parties du ladder.",
+  "Result": "Résultat",
+  "Where": "Où",
+  "Item": "Objet",
+  "Why": "Pourquoi",
+  "Hero builds": "Builds des héros",
+  "All hero builds pass the game's build check.": "Tous les builds de héros passent la vérification de build du jeu.",
+  "Gold is over the game's limit of {0}.": "L'or dépasse la limite du jeu de {0}.",
+  "No changes yet. Change the gold in Gold & Charsi first.": "Pas encore de modification. Changez d'abord l'or dans Or et Charsi.",
+  "Changes discarded.": "Modifications annulées.",
+  "No changes": "Aucune modification",
+  "Hero build check": "Vérification des builds",
+  "The game's build check rejects these hero builds (the game reports them and keeps the save off the leaderboard):": "La vérification de build du jeu rejette ces builds de héros (le jeu les signale et exclut la sauvegarde du classement) :",
+  "Export anyway?": "Exporter quand même ?",
+  "Items the game cannot read": "Objets que le jeu ne peut pas lire",
+  "The game will DROP these items when it loads the save:": "Le jeu SUPPRIMERA ces objets au chargement de la sauvegarde :",
+  "New save code generated. Copy it into the game's SAVES menu.": "Nouveau code de sauvegarde généré. Copiez-le dans le menu SAVES du jeu.",
+  "Share Generated Save?": "Partager la sauvegarde générée ?",
+  "Save Submitted": "Sauvegarde envoyée",
+  "Save Submission Failed": "Échec de l'envoi",
+  "Your save was generated and can still be used normally. Uploading it to the database failed.": "Votre sauvegarde a été générée et reste utilisable normalement. L'envoi vers la base de données a échoué.",
+  "Details: {0}": "Détails : {0}",
+  "Could not generate the save: {0}": "Impossible de générer la sauvegarde : {0}",
+  "Copied. Paste it into the game's SAVES menu.": "Copié. Collez-le dans le menu SAVES du jeu.",
+  "Copied.": "Copié.",
+  "full version": "version complète",
+  "Preview of what the full editor does:": "Aperçu de ce que fait l'éditeur complet :",
+  "The full version is free on our Discord, together with updates, help and item requests.": "La version complète est gratuite sur notre Discord, avec les mises à jour, l'aide et les demandes d'objets.",
+  "GET THE FULL VERSION ON DISCORD": "OBTENIR LA VERSION COMPLÈTE SUR DISCORD",
+  "How to use the web editor": "Mode d'emploi de l'éditeur web",
+  "<b>Load your save.</b> In the game open <b>SAVES</b>, copy the code (starts with <code>D2S1:</code>), paste it at the top and click <b>Load Save Code</b>. Keep the original code somewhere safe.": "<b>Chargez votre sauvegarde.</b> Dans le jeu, ouvrez <b>SAVES</b>, copiez le code (commence par <code>D2S1:</code>), collez-le en haut et cliquez sur <b>Charger le code</b>. Gardez le code d'origine en lieu sûr.",
+  "<b>Pick a hero</b> in the bar above the tabs. Character &amp; Mercenary shows the level, skills and mercenary.": "<b>Choisissez un héros</b> dans la barre au-dessus des onglets. Personnage et mercenaire affiche le niveau, les compétences et le mercenaire.",
+  "<b>Gold &amp; Charsi:</b> type a new amount and click <b>Apply Gold</b>, or use the quick buttons. The table shows every Charsi ware in your save: ranks, gold spent, the next price and the gold to max. \"How much gold for…\" tells you the exact price of any level.": "<b>Or et Charsi :</b> tapez un nouveau montant et cliquez sur <b>Appliquer l'or</b>, ou utilisez les boutons rapides. Le tableau montre chaque marchandise de Charsi de votre sauvegarde : rangs, or dépensé, prix suivant et or jusqu'au max. « Combien d'or pour… » vous donne le prix exact de n'importe quel niveau.",
+  "<b>Items &amp; Modifiers / Stash:</b> click an item to see its tooltip like in the game, and whether the game sees it as legit. \"Show every stat and its range\" lists each stat with the range the game allows.": "<b>Objets et modificateurs / Coffre :</b> cliquez sur un objet pour voir son infobulle comme dans le jeu, et si le jeu le considère comme legit. « Afficher chaque statistique et sa plage » liste chaque statistique avec la plage autorisée par le jeu.",
+  "<b>Reference:</b> every unique, set item and runeword with its ranges. Search by name or by property (\"faster cast\").": "<b>Référence :</b> chaque objet unique, objet d'ensemble et mot runique avec ses plages. Recherchez par nom ou par propriété (« faster cast »).",
+  "<b>Check save:</b> runs the game's own checks on every item and hero build.": "<b>Vérifier la sauvegarde :</b> lance les vérifications du jeu sur chaque objet et chaque build de héros.",
+  "<b>Preview &amp; Export:</b> review the changes, click <b>Generate Save Code</b>, copy the new code and paste it into the game's <b>SAVES</b> menu.": "<b>Aperçu et export :</b> vérifiez les modifications, cliquez sur <b>Générer le code de sauvegarde</b>, copiez le nouveau code et collez-le dans le menu <b>SAVES</b> du jeu.",
+  "Language": "Langue",
+  "Click the globe and flag in the top-right corner and pick English, Polski, Deutsch, Français, 한국어 or 简体中文. The page switches at once and remembers the choice. Item, skill and class names stay as the game shows them.": "Cliquez sur le globe et le drapeau en haut à droite et choisissez English, Polski, Deutsch, Français, 한국어 ou 简体中文. La page change tout de suite et retient le choix. Les noms d'objets, de compétences et de classes restent tels que le jeu les affiche.",
+  "Update notice": "Avis de mise à jour",
+  "The badge at the top shows the newest stable version. The stable version with every feature is free on our Discord; click the badge to join.": "Le badge en haut indique la dernière version stable. La version stable avec toutes les fonctions est gratuite sur notre Discord ; cliquez sur le badge pour rejoindre.",
+  "Your data": "Vos données",
+  "Everything runs in your browser: your save is not uploaded anywhere. After every export the editor asks whether you want to share the save with the editor's database; nothing is sent unless you click <b>Yes</b>.": "Tout fonctionne dans votre navigateur : votre sauvegarde n'est envoyée nulle part. Après chaque export, l'éditeur demande si vous voulez partager la sauvegarde avec la base de données de l'éditeur ; rien n'est envoyé si vous ne cliquez pas sur <b>Oui</b>.",
+  "Good to know": "Bon à savoir",
+  "The editor is made for offline fun, not for the ladder: the game marks edited saves, and runs with them don't count towards leaderboards.": "L'éditeur est fait pour s'amuser hors ligne, pas pour le ladder : le jeu marque les sauvegardes modifiées, et les parties jouées avec ne comptent pas pour les classements.",
+  "Re-rolling items": "Relancer des objets",
+  "Setting item values": "Définir les valeurs d'objets",
+  "DESIGN (item pictures)": "APPARENCE (images des objets)",
+  "Discard every change and go back to the loaded save?": "Annuler toutes les modifications et revenir à la sauvegarde chargée ?",
+  "Nothing was changed. Generate the save code anyway?": "Rien n'a été modifié. Générer quand même le code de sauvegarde ?",
+  "Would you like to submit this generated save to our database to help improve D2 Survivors Save Editor?\n\nData to be submitted:\n• Full generated save code\n• Player nickname read from the save (the actual nickname will not be displayed)\n• Editor version\n• Submission date\n\nSubmission is optional. Choosing No will not affect your save.": "Voulez-vous envoyer cette sauvegarde générée à notre base de données pour aider à améliorer D2 Survivors Save Editor ?\n\nDonnées envoyées :\n• Code de sauvegarde généré complet\n• Pseudo du joueur lu dans la sauvegarde (le pseudo lui-même ne sera pas affiché)\n• Version de l'éditeur\n• Date d'envoi\n\nL'envoi est facultatif. Choisir Non n'affecte pas votre sauvegarde.",
+  "Thank you! Your save has been submitted to the database.": "Merci ! Votre sauvegarde a été envoyée à la base de données.",
+  "The save was loaded from a save.json file - keep that file as your original.": "La sauvegarde a été chargée depuis un fichier save.json - gardez ce fichier comme original.",
+  "Unique, set, rare, magic and white items made exactly like the game makes them (they stay legit)": "Objets uniques, d'ensemble, rares, magiques et blancs créés exactement comme le jeu les crée (ils restent legit)",
+  "Pick the exact rolls you want; rares with up to 6 chosen affixes and an exact affix count": "Choisissez exactement les tirages voulus ; rares avec jusqu'à 6 affixes choisis et un nombre exact d'affixes",
+  "COPY ITEM: copy any item to any hero's inventory, gear, mercenary or stash, exactly or with a new roll": "COPIER L'OBJET : copiez n'importe quel objet dans l'inventaire, l'équipement, le mercenaire ou le coffre de n'importe quel héros, à l'identique ou avec un nouveau tirage",
+  "DESIGN: pick the picture of rings, amulets and charms": "APPARENCE : choisissez l'image des anneaux, amulettes et charmes",
+  "Re-roll items you own to the values you want": "Relancez vos objets vers les valeurs voulues",
+  "Every runeword on every base it can drop on, with the rolls you want": "Chaque mot runique sur chaque base où il peut tomber, avec les tirages voulus",
+  "Small, Large and Grand charms with the prefix and suffix you want": "Small, Large et Grand Charms avec le préfixe et le suffixe voulus",
+  "Grand Charms and skillers made the way the game makes them": "Grand Charms et skillers créés comme le jeu les crée",
+  "Change skill levels for every hero": "Changer les niveaux de compétences de chaque héros",
+  "The game's own build check, so builds stay valid": "La vérification de build du jeu, pour que les builds restent valides",
+  "Search skills by tree, type and name": "Rechercher les compétences par arbre, type et nom",
+  "Fill every belt slot with healing, mana or rejuvenation potions": "Remplissez chaque emplacement de ceinture de potions de soin, de mana ou de régénération",
+  "Set how many of each, within the game's limits": "Choisissez combien de chaque, dans les limites du jeu",
+  "Yes": "Oui",
+  "No": "Non",
+  "Close": "Fermer",
+  "Join Discord": "Rejoindre Discord",
+  "Submission is optional. Choosing No will not affect your save.": "L'envoi est facultatif. Choisir Non n'affecte pas votre sauvegarde.",
+  "UNREADABLE: the game drops this item when it loads the save ({0})": "ILLISIBLE : le jeu supprime cet objet au chargement de la sauvegarde ({0})",
+  "NOT LEGIT: {0} (red border in game)": "NOT LEGIT : {0} (bordure rouge en jeu)",
+  "LEGIT: regenerates exactly from its roll": "LEGIT : se régénère exactement depuis son tirage",
+  "NOT LEGIT: differs from what its roll makes (red border in game)": "NOT LEGIT : diffère de ce que donne son tirage (bordure rouge en jeu)",
+  "LEGIT: no roll, inside the game's ranges": "LEGIT : sans tirage, dans les plages du jeu",
+  "Roll: seed {0}": "Tirage : graine {0}",
+  "item level {0}": "niveau d'objet {0}",
+  "No roll": "Pas de tirage",
+  "Level {0}": "Niveau {0}",
+  "Ethereal": "Éthéré",
+  "Equipped": "Équipé",
+  "Inventory": "Inventaire",
+  "Charms": "Charmes",
+  "Mercenary · {0}": "Mercenaire · {0}",
+  "Mercenary · {0} (active)": "Mercenaire · {0} (actif)",
+  "Shared stash {0}": "Coffre partagé {0}",
+  "Personal stash · {0}": "Coffre personnel · {0}",
+  "Uniques tab": "Onglet des Uniques",
+  "inventory {0}": "inventaire {0}",
+  "charm {0}": "charme {0}",
+  "slot {0}": "case {0}",
+  "Paste a save code (it starts with D2S1:) or choose a save file.": "Collez un code de sauvegarde (il commence par D2S1:) ou choisissez un fichier de sauvegarde.",
+  "This is not a D2 Survivors save code: it must start with D2S1:": "Ce n'est pas un code de sauvegarde D2 Survivors : il doit commencer par D2S1:",
+  "The save could not be read (no version number).": "Impossible de lire la sauvegarde (pas de numéro de version).",
+  "Gold must be a whole number.": "L'or doit être un nombre entier.",
+  "Gold cannot be negative.": "L'or ne peut pas être négatif.",
+  "{0} is not sold in Hardcore.": "{0} n'est pas vendu en Hardcore.",
+  "{0}: the save already has level {1} (of {2}).": "{0} : la sauvegarde a déjà le niveau {1} (sur {2}).",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks.": "{0} du niveau {1} au {2} ({3}) : {4} or. Bonus {5} → {6} rangs.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. You have enough gold.": "{0} du niveau {1} au {2} ({3}) : {4} or. Bonus {5} → {6} rangs. Vous avez assez d'or.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold.": "{0} du niveau {1} au {2} ({3}) : {4} or. Bonus {5} → {6} rangs. Il manque {7} or.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold. More than the {8} gold a save can hold: buy it in steps.": "{0} du niveau {1} au {2} ({3}) : {4} or. Bonus {5} → {6} rangs. Il manque {7} or. Plus que les {8} pièces d'or qu'une sauvegarde peut contenir : achetez par étapes.",
+  "normal rank {0}": "rang normal {0}",
+  "extra rank {0}": "rang supplémentaire {0}",
+  "fixed {0}": "fixe {0}",
+  "unknown": "inconnu",
+  "unique property": "propriété unique",
+  "runeword / rune": "mot runique / rune",
+  "set property": "propriété d'ensemble",
+  "prefix": "préfixe",
+  "suffix": "suffixe",
+  "needs item level {0}+": "demande le niveau d'objet {0}+",
+  "Bases: {0} ({1} base types)": "Bases : {0} ({1} types de base)",
+  "Drops from item level {0}": "Tombe à partir du niveau d'objet {0}",
+  "Base defense {0}-{1}": "Défense de base {0}-{1}",
+  "Required level {0}+": "Niveau requis {0}+",
+  "From the runes": "Avec les runes",
+  "From the runes in a weapon": "Des runes dans une arme",
+  "From the runes in a helm or body armor": "Des runes dans un heaume ou une armure",
+  "From the runes in a shield": "Des runes dans un bouclier",
+  "With more items of the set worn": "Avec plus d'objets de l'ensemble portés",
+  "Gold: {0} → {1}": "Or : {0} → {1}",
+  "UNREADABLE": "ILLISIBLE",
+  "Amazon only": "Amazon uniquement",
+  "Assassin only": "Assassin uniquement",
+  "Barbarian only": "Barbarian uniquement",
+  "Druid only": "Druid uniquement",
+  "Necromancer only": "Necromancer uniquement",
+  "Paladin only": "Paladin uniquement",
+  "Sorceress only": "Sorceress uniquement",
+  "Helms": "Heaumes",
+  "Amulets": "Amulettes",
+  "Body Armor": "Armures",
+  "Shields": "Boucliers",
+  "Gloves": "Gants",
+  "Belts": "Ceintures",
+  "Boots": "Bottes",
+  "Rings": "Anneaux",
+  "Axes": "Haches",
+  "Swords": "Épées",
+  "Maces": "Masses",
+  "Scepters": "Sceptres",
+  "Daggers": "Dagues",
+  "Throwing Weapons": "Armes de jet",
+  "Javelins": "Javelots",
+  "Spears": "Lances",
+  "Polearms": "Armes d'hast",
+  "Bows": "Arcs",
+  "Crossbows": "Arbalètes",
+  "Staves": "Bâtons",
+  "Wands": "Baguettes",
+  "Orbs": "Orbes",
+  "Claws": "Griffes",
+  "Runewords": "Mots runiques",
+  "Weapons": "Armes"
+ },
+ "ko": {
+  "{0} (set I, in hand)": "{0} (세트 I, 손에 듦)",
+  "{0} (set II, in hand)": "{0} (세트 II, 손에 듦)",
+  "{0} (set I)": "{0} (세트 I)",
+  "{0} (set II)": "{0} (세트 II)",
+  "Put weapons and shields into either weapon set": "무기와 방패를 어느 무기 세트에도 넣기",
+  "DEV GENERATION: unique or set items with up to 48 stats of your choice, values 1-1000 (Not legit, for testing builds offline)": "DEV GENERATION: 원하는 능력치를 최대 48개 넣은 고유 또는 세트 아이템, 값 1-1000 (Not legit, 오프라인 빌드 테스트용)",
+  "Runewords on class bases keep the base's own property, like in the game": "직업 베이스의 룬워드는 게임처럼 베이스 고유 속성을 유지",
+  "Load a save, change gold, see Charsi's prices and check every item with the game's own rules, then export.": "세이브를 불러와 골드를 바꾸고, Charsi 가격을 보고, 게임 자체 규칙으로 모든 아이템을 검사한 뒤 내보내세요.",
+  "Gold &amp; Charsi, items (view), stash, reference, save check and export work here. Item Generator, Runewords, Charms, Skills, Belt, COPY ITEM and DESIGN are previews — <strong>the full version is free on our Discord.</strong>": "여기서는 골드 및 Charsi, 아이템(보기), 보관함, 아이템 사전, 세이브 검사, 내보내기가 작동합니다. 아이템 생성기, 룬워드, 부적, 스킬, 허리띠, 아이템 복사, 외형은 미리보기입니다 — <strong>정식 버전은 디스코드에서 무료입니다.</strong>",
+  "GET THE FULL VERSION": "정식 버전 받기",
+  "1. Your save": "1. 내 세이브",
+  "In the game open <b>SAVES</b>, copy your save code (it starts with <code>D2S1:</code>) and paste it here. You can also load a code saved in a .txt file, or the game's own <code>save.json</code>.": "게임에서 <b>SAVES</b>를 열고 세이브 코드(<code>D2S1:</code>로 시작)를 복사해 여기에 붙여넣으세요. .txt 파일에 저장한 코드나 게임의 <code>save.json</code> 파일도 불러올 수 있습니다.",
+  "Load Save Code": "세이브 코드 불러오기",
+  "Load from File…": "파일에서 불러오기…",
+  "Paste Clipboard": "클립보드 붙여넣기",
+  "Clear": "지우기",
+  "Character & Mercenary": "캐릭터 및 용병",
+  "Gold & Charsi": "골드 및 Charsi",
+  "Items & Modifiers": "아이템 및 속성",
+  "Stash": "보관함",
+  "Reference": "아이템 사전",
+  "Check save": "세이브 검사",
+  "Preview & Export": "미리보기 및 내보내기",
+  "Item Generator": "아이템 생성기",
+  "Runewords & Charms": "룬워드 및 부적",
+  "Skills": "스킬",
+  "Belt & Potions": "허리띠 및 물약",
+  "? HOW TO USE EDITOR": "? 에디터 사용법",
+  "Gold": "골드",
+  "New amount": "새 금액",
+  "Apply Gold": "골드 적용",
+  "How much gold for…": "필요한 골드 계산…",
+  "Ware": "상품",
+  "up to level": "목표 레벨",
+  "Calculate": "계산",
+  "Add exactly that much gold": "정확히 그만큼 골드 추가",
+  "Charsi's wares in this save": "이 세이브의 Charsi 상품",
+  "Pick an item on the left.": "왼쪽에서 아이템을 고르세요.",
+  "All": "전체",
+  "Unique": "고유",
+  "Set item": "세트 아이템",
+  "Runeword": "룬워드",
+  "All classes": "모든 클래스",
+  "The game's own checks for every item (readable, legit) and every hero build.": "모든 아이템(읽기 가능, legit)과 모든 영웅 빌드에 대한 게임 자체 검사.",
+  "Changes": "변경 사항",
+  "Generate Save Code": "세이브 코드 생성",
+  "Reset Changes": "변경 사항 초기화",
+  "New save code": "새 세이브 코드",
+  "Copy the whole code into the game's <b>SAVES</b> menu. Keep your original code too.": "코드 전체를 게임의 <b>SAVES</b> 메뉴에 붙여넣으세요. 원래 코드도 보관하세요.",
+  "Copy Code": "코드 복사",
+  "Save to File…": "파일로 저장…",
+  "Save Original to File…": "원본을 파일로 저장…",
+  "Join our Discord": "디스코드에 참여하세요",
+  "The full version is free there: Item Generator, Runewords, Charms, COPY ITEM, Skills and Belt editors. Updates, help and item requests too.": "그곳에서 정식 버전이 무료입니다: 아이템 생성기, 룬워드, 부적, 아이템 복사, 스킬 및 허리띠 편집기. 업데이트, 도움말, 아이템 요청도 있습니다.",
+  "Join Discord ↗": "디스코드 참여 ↗",
+  "⚠️ LEADERBOARD WARNING: Modified saves may flag your character. Runs made with an edited character will not count toward leaderboards. Keep an untouched backup of your original save.": "⚠️ 리더보드 경고: 수정된 세이브는 캐릭터가 표시될 수 있습니다. 편집한 캐릭터로 한 런은 리더보드에 포함되지 않습니다. 원본 세이브를 손대지 않은 백업으로 보관하세요.",
+  "Follow Just a Polish Guy": "Just a Polish Guy 팔로우",
+  "Community & support": "커뮤니티 및 지원",
+  "Tutorials & videos": "튜토리얼 및 영상",
+  "Projects & code": "프로젝트 및 코드",
+  "Follow the project": "프로젝트 팔로우",
+  "Created by Just a Polish Guy · D2 Survivors Save Editor · an independent community project, not affiliated with the game's developers": "제작: Just a Polish Guy · D2 Survivors Save Editor · 게임 개발사와 관련 없는 독립 커뮤니티 프로젝트",
+  "Search names or properties, e.g. faster cast": "이름이나 속성 검색, 예: faster cast",
+  "Gold: {0}": "골드: {0}",
+  "Full version only": "정식 버전 전용",
+  "{0} is in the full version of the editor.\n\nThe full version is FREE on our Discord: {1}": "{0} 기능은 에디터 정식 버전에 있습니다.\n\n정식 버전은 디스코드에서 무료입니다: {1}",
+  "Loading the game's rules (first visit downloads about 12 MB, then it is cached)…": "게임 규칙을 불러오는 중 (첫 방문 때 약 12MB를 내려받고 이후에는 캐시됨)…",
+  "Loading the editor's game data…": "에디터의 게임 데이터를 불러오는 중…",
+  "The editor could not start: {0}. Refresh the page; if it keeps happening, tell us on Discord.": "에디터를 시작할 수 없습니다: {0}. 페이지를 새로고침하고, 계속 그러면 디스코드에 알려 주세요.",
+  "Ready. Paste your save code and click Load Save Code.": "준비 완료. 세이브 코드를 붙여넣고 세이브 코드 불러오기를 클릭하세요.",
+  "Checking for updates…": "업데이트 확인 중…",
+  "YOU HAVE v{0} (WEB) · STABLE v{1} IS AVAILABLE ON DISCORD · CLICK TO JOIN": "현재 v{0} (웹) · 안정 버전 v{1} 디스코드에 있음 · 클릭해서 참여",
+  "YOU HAVE v{0} (WEB) · THE FULL STABLE VERSION IS FREE ON DISCORD · CLICK TO JOIN": "현재 v{0} (웹) · 정식 안정 버전은 디스코드에서 무료 · 클릭해서 참여",
+  "Save loaded: {0}, {1} hero(es), {2} items, {3} gold.": "세이브 불러옴: {0}, 영웅 {1}명, 아이템 {2}개, 골드 {3}.",
+  "The game has already marked this save as edited.": "게임이 이미 이 세이브를 편집됨으로 표시했습니다.",
+  "Could not load the save: {0}": "세이브를 불러올 수 없습니다: {0}",
+  "The browser did not allow reading the clipboard. Paste with Ctrl+V into the box instead.": "브라우저가 클립보드 읽기를 허용하지 않았습니다. 상자에 Ctrl+V로 붙여넣으세요.",
+  "Hero:": "영웅:",
+  "lvl {0}": "레벨 {0}",
+  "No hero in this save yet.": "이 세이브에는 아직 영웅이 없습니다.",
+  "(active)": "(활성)",
+  "{0} item(s) worn": "착용 아이템 {0}개",
+  "skills:": "스킬:",
+  "No mercenary hired.": "고용한 용병 없음.",
+  "No skills picked yet.": "아직 고른 스킬이 없습니다.",
+  "Level": "레벨",
+  "Difficulty": "난이도",
+  "act {0}": "{0}막",
+  "State": "상태",
+  "Items": "아이템",
+  "{0} equipped · {1} in inventory · {2} charms": "착용 {0} · 인벤토리 {1} · 부적 {2}",
+  "Mercenary": "용병",
+  "Editing skills": "스킬 편집",
+  "Edit skills": "스킬 편집",
+  "Editing the belt and potions": "허리띠와 물약 편집",
+  "Edit belt": "허리띠 편집",
+  "The game accepts up to {0} gold.": "게임은 최대 {0} 골드까지 허용합니다.",
+  "Max ({0})": "최대 ({0})",
+  "Gold set to {0}. Open Preview & Export to make the new save code.": "골드를 {0}(으)로 설정했습니다. 미리보기 및 내보내기에서 새 세이브 코드를 만드세요.",
+  "Gold in the save: {0}": "세이브의 골드: {0}",
+  "Rank": "랭크",
+  "Extra ranks": "추가 랭크",
+  "Bonus now (ranks)": "현재 보너스 (랭크)",
+  "Gold spent": "쓴 골드",
+  "Next level costs": "다음 레벨 비용",
+  "Gold to max": "최대까지 골드",
+  "Each rank gives": "랭크당 효과",
+  "not in Hardcore": "하드코어 없음",
+  "maxed": "최대",
+  "extra:": "추가:",
+  "(less each rank)": "(랭크마다 감소)",
+  "Spent at Charsi so far: {0} gold · To max every ware: {1} gold · Gold now: {2} ({3}% of that)": "지금까지 Charsi에 쓴 골드: {0} · 모든 상품 최대까지: {1} 골드 · 현재 골드: {2} (그중 {3}%)",
+  "Spent at Charsi so far: {0} gold · every ware is maxed": "지금까지 Charsi에 쓴 골드: {0} · 모든 상품이 최대입니다",
+  "Type a level.": "레벨을 입력하세요.",
+  "Empty.": "비어 있음.",
+  "Pick an item on the left. A green dot means the game sees it as legit, red means it does not.": "왼쪽에서 아이템을 고르세요. 초록 점은 게임이 legit으로 보는 것, 빨간 점은 아닌 것입니다.",
+  "Show every stat and its range": "모든 능력치와 범위 보기",
+  "Re-roll to wanted values": "원하는 수치로 리롤",
+  "Set values directly": "값 직접 설정",
+  "COPY ITEM": "아이템 복사",
+  "DESIGN": "외형",
+  "Stat in save": "세이브 속 능력치",
+  "Shown in game as": "게임 표시",
+  "Value": "값",
+  "Game range": "게임 범위",
+  "Source": "출처",
+  "Every unique, set item and runeword in the game, with what it can roll. From the game's own tables ({0}).": "게임의 모든 고유·세트 아이템과 룬워드, 그리고 굴릴 수 있는 옵션. 게임 자체 테이블 기준 ({0}).",
+  "{0} item(s)": "아이템 {0}개",
+  "set": "세트",
+  "runeword": "룬워드",
+  "Making items in the Item Generator": "아이템 생성기에서 아이템 만들기",
+  "Make this item": "이 아이템 만들기",
+  "Checking every item with the game's rules…": "게임 규칙으로 모든 아이템을 검사하는 중…",
+  "Items checked with the game's own rules ({0}):": "게임 규칙으로 아이템 검사 ({0}):",
+  "{0} legit": "legit {0}개",
+  "{0} to review": "확인 필요 {0}개",
+  "{0} regenerate exactly from their roll; {1} have no roll and pass the game's range rules.": "{0}개는 롤에서 정확히 재생성되고, {1}개는 롤이 없지만 게임 범위 규칙을 통과합니다.",
+  "UNREADABLE: the game drops this item when it loads the save. NOT LEGIT: the game shows a red \"Not legit\" border; worn, it keeps runs off the ladder.": "읽을 수 없음: 게임이 세이브를 불러올 때 이 아이템을 삭제합니다. NOT LEGIT: 게임에 빨간 \"Not legit\" 테두리가 표시되고, 착용하면 래더 기록에서 제외됩니다.",
+  "Result": "결과",
+  "Where": "위치",
+  "Item": "아이템",
+  "Why": "이유",
+  "Hero builds": "영웅 빌드",
+  "All hero builds pass the game's build check.": "모든 영웅 빌드가 게임 빌드 검사를 통과했습니다.",
+  "Gold is over the game's limit of {0}.": "골드가 게임 한도 {0}을(를) 넘었습니다.",
+  "No changes yet. Change the gold in Gold & Charsi first.": "아직 변경 사항이 없습니다. 먼저 골드 및 Charsi에서 골드를 바꾸세요.",
+  "Changes discarded.": "변경 사항을 버렸습니다.",
+  "No changes": "변경 없음",
+  "Hero build check": "영웅 빌드 검사",
+  "The game's build check rejects these hero builds (the game reports them and keeps the save off the leaderboard):": "게임 빌드 검사가 다음 영웅 빌드를 거부합니다 (게임이 보고하고 세이브는 리더보드에서 제외됨):",
+  "Export anyway?": "그래도 내보낼까요?",
+  "Items the game cannot read": "게임이 읽을 수 없는 아이템",
+  "The game will DROP these items when it loads the save:": "게임이 세이브를 불러올 때 다음 아이템을 삭제합니다:",
+  "New save code generated. Copy it into the game's SAVES menu.": "새 세이브 코드를 생성했습니다. 게임의 SAVES 메뉴에 붙여넣으세요.",
+  "Share Generated Save?": "생성된 세이브를 공유할까요?",
+  "Save Submitted": "세이브 제출됨",
+  "Save Submission Failed": "세이브 제출 실패",
+  "Your save was generated and can still be used normally. Uploading it to the database failed.": "세이브는 생성되었고 평소처럼 쓸 수 있습니다. 데이터베이스 업로드에 실패했습니다.",
+  "Details: {0}": "세부 정보: {0}",
+  "Could not generate the save: {0}": "세이브를 생성할 수 없습니다: {0}",
+  "Copied. Paste it into the game's SAVES menu.": "복사했습니다. 게임의 SAVES 메뉴에 붙여넣으세요.",
+  "Copied.": "복사했습니다.",
+  "Original": "원래 값",
+  "full version": "정식 버전",
+  "Preview of what the full editor does:": "정식 에디터 기능 미리보기:",
+  "The full version is free on our Discord, together with updates, help and item requests.": "정식 버전은 디스코드에서 무료이며, 업데이트, 도움말, 아이템 요청도 함께 있습니다.",
+  "GET THE FULL VERSION ON DISCORD": "디스코드에서 정식 버전 받기",
+  "How to use the web editor": "웹 에디터 사용법",
+  "<b>Load your save.</b> In the game open <b>SAVES</b>, copy the code (starts with <code>D2S1:</code>), paste it at the top and click <b>Load Save Code</b>. Keep the original code somewhere safe.": "<b>세이브 불러오기.</b> 게임에서 <b>SAVES</b>를 열고 코드(<code>D2S1:</code>로 시작)를 복사해 위쪽에 붙여넣은 뒤 <b>세이브 코드 불러오기</b>를 클릭하세요. 원래 코드는 안전한 곳에 보관하세요.",
+  "<b>Pick a hero</b> in the bar above the tabs. Character &amp; Mercenary shows the level, skills and mercenary.": "탭 위의 막대에서 <b>영웅을 고르세요</b>. 캐릭터 및 용병에서 레벨, 스킬, 용병을 볼 수 있습니다.",
+  "<b>Gold &amp; Charsi:</b> type a new amount and click <b>Apply Gold</b>, or use the quick buttons. The table shows every Charsi ware in your save: ranks, gold spent, the next price and the gold to max. \"How much gold for…\" tells you the exact price of any level.": "<b>골드 및 Charsi:</b> 새 금액을 입력하고 <b>골드 적용</b>을 클릭하거나 빠른 버튼을 쓰세요. 표에는 세이브의 모든 Charsi 상품이 나옵니다: 랭크, 쓴 골드, 다음 가격, 최대까지 필요한 골드. '필요한 골드 계산…'은 어떤 레벨이든 정확한 가격을 알려 줍니다.",
+  "<b>Items &amp; Modifiers / Stash:</b> click an item to see its tooltip like in the game, and whether the game sees it as legit. \"Show every stat and its range\" lists each stat with the range the game allows.": "<b>아이템 및 속성 / 보관함:</b> 아이템을 클릭하면 게임과 같은 툴팁과 게임이 legit으로 보는지 여부가 나옵니다. '모든 능력치와 범위 보기'는 각 능력치를 게임이 허용하는 범위와 함께 보여 줍니다.",
+  "<b>Reference:</b> every unique, set item and runeword with its ranges. Search by name or by property (\"faster cast\").": "<b>아이템 사전:</b> 모든 고유·세트 아이템과 룬워드의 범위. 이름이나 속성('faster cast')으로 검색하세요.",
+  "<b>Check save:</b> runs the game's own checks on every item and hero build.": "<b>세이브 검사:</b> 모든 아이템과 영웅 빌드에 게임 자체 검사를 실행합니다.",
+  "<b>Preview &amp; Export:</b> review the changes, click <b>Generate Save Code</b>, copy the new code and paste it into the game's <b>SAVES</b> menu.": "<b>미리보기 및 내보내기:</b> 변경 사항을 확인하고 <b>세이브 코드 생성</b>을 클릭한 뒤, 새 코드를 복사해 게임의 <b>SAVES</b> 메뉴에 붙여넣으세요.",
+  "Language": "언어",
+  "Click the globe and flag in the top-right corner and pick English, Polski, Deutsch, Français, 한국어 or 简体中文. The page switches at once and remembers the choice. Item, skill and class names stay as the game shows them.": "오른쪽 위의 지구본과 국기를 클릭해 English, Polski, Deutsch, Français, 한국어, 简体中文 중에서 고르세요. 페이지가 바로 바뀌고 선택을 기억합니다. 아이템, 스킬, 클래스 이름은 게임에 표시되는 그대로입니다.",
+  "Update notice": "업데이트 알림",
+  "The badge at the top shows the newest stable version. The stable version with every feature is free on our Discord; click the badge to join.": "위쪽 배지는 최신 안정 버전을 보여 줍니다. 모든 기능이 있는 안정 버전은 디스코드에서 무료이며, 배지를 클릭하면 참여할 수 있습니다.",
+  "Your data": "내 데이터",
+  "Everything runs in your browser: your save is not uploaded anywhere. After every export the editor asks whether you want to share the save with the editor's database; nothing is sent unless you click <b>Yes</b>.": "모든 것이 브라우저 안에서 실행됩니다: 세이브는 어디에도 업로드되지 않습니다. 내보낼 때마다 에디터 데이터베이스와 세이브를 공유할지 묻고, <b>예</b>를 클릭하지 않으면 아무것도 보내지 않습니다.",
+  "Good to know": "알아 두면 좋은 점",
+  "The editor is made for offline fun, not for the ladder: the game marks edited saves, and runs with them don't count towards leaderboards.": "이 에디터는 오프라인 재미용이며 래더용이 아닙니다: 게임은 편집된 세이브를 표시하고, 그 세이브로 한 런은 리더보드에 포함되지 않습니다.",
+  "Re-rolling items": "아이템 리롤",
+  "Setting item values": "아이템 값 설정",
+  "DESIGN (item pictures)": "외형 (아이템 그림)",
+  "Discard every change and go back to the loaded save?": "모든 변경 사항을 버리고 불러온 세이브로 돌아갈까요?",
+  "Nothing was changed. Generate the save code anyway?": "바뀐 것이 없습니다. 그래도 세이브 코드를 생성할까요?",
+  "Would you like to submit this generated save to our database to help improve D2 Survivors Save Editor?\n\nData to be submitted:\n• Full generated save code\n• Player nickname read from the save (the actual nickname will not be displayed)\n• Editor version\n• Submission date\n\nSubmission is optional. Choosing No will not affect your save.": "D2 Survivors Save Editor 개선을 위해 이 생성된 세이브를 데이터베이스에 제출할까요?\n\n제출되는 데이터:\n• 생성된 세이브 코드 전체\n• 세이브에서 읽은 플레이어 닉네임 (실제 닉네임은 표시되지 않음)\n• 에디터 버전\n• 제출 날짜\n\n제출은 선택 사항입니다. 아니요를 골라도 세이브에는 영향이 없습니다.",
+  "Thank you! Your save has been submitted to the database.": "감사합니다! 세이브가 데이터베이스에 제출되었습니다.",
+  "The save was loaded from a save.json file - keep that file as your original.": "세이브를 save.json 파일에서 불러왔습니다 - 그 파일을 원본으로 보관하세요.",
+  "Unique, set, rare, magic and white items made exactly like the game makes them (they stay legit)": "게임과 똑같은 방식으로 만든 고유, 세트, 희귀, 마법, 일반 아이템 (legit 유지)",
+  "Pick the exact rolls you want; rares with up to 6 chosen affixes and an exact affix count": "원하는 옵션을 정확히 고르기; 희귀 아이템은 최대 6개 접사와 정확한 접사 개수",
+  "COPY ITEM: copy any item to any hero's inventory, gear, mercenary or stash, exactly or with a new roll": "아이템 복사: 아무 아이템이나 영웅의 인벤토리, 장비, 용병, 보관함으로 그대로 또는 새 롤로 복사",
+  "DESIGN: pick the picture of rings, amulets and charms": "외형: 반지, 목걸이, 부적의 그림 선택",
+  "Re-roll items you own to the values you want": "가진 아이템을 원하는 수치로 리롤",
+  "Every runeword on every base it can drop on, with the rolls you want": "드롭될 수 있는 모든 베이스의 모든 룬워드를 원하는 옵션으로",
+  "Small, Large and Grand charms with the prefix and suffix you want": "원하는 접두사와 접미사를 가진 Small, Large, Grand Charm",
+  "Grand Charms and skillers made the way the game makes them": "게임 방식 그대로 만든 거대 부적과 스킬러",
+  "Change skill levels for every hero": "모든 영웅의 스킬 레벨 변경",
+  "The game's own build check, so builds stay valid": "게임 자체 빌드 검사로 빌드를 올바르게 유지",
+  "Search skills by tree, type and name": "트리, 종류, 이름으로 스킬 검색",
+  "Fill every belt slot with healing, mana or rejuvenation potions": "허리띠 모든 칸을 생명력, 마나, 회복 물약으로 채우기",
+  "Set how many of each, within the game's limits": "게임 한도 안에서 각각 몇 개인지 설정",
+  "Yes": "예",
+  "No": "아니요",
+  "OK": "확인",
+  "Close": "닫기",
+  "Join Discord": "디스코드 참여",
+  "Submission is optional. Choosing No will not affect your save.": "제출은 선택 사항입니다. 아니요를 골라도 세이브에는 영향이 없습니다.",
+  "UNREADABLE: the game drops this item when it loads the save ({0})": "읽을 수 없음: 게임이 세이브를 불러올 때 이 아이템을 삭제합니다 ({0})",
+  "NOT LEGIT: {0} (red border in game)": "NOT LEGIT: {0} (게임에서 빨간 테두리)",
+  "LEGIT: regenerates exactly from its roll": "LEGIT: 롤에서 정확히 재생성됩니다",
+  "NOT LEGIT: differs from what its roll makes (red border in game)": "NOT LEGIT: 롤이 만드는 것과 다름 (게임에서 빨간 테두리)",
+  "LEGIT: no roll, inside the game's ranges": "LEGIT: 롤 없음, 게임 범위 안",
+  "Roll: seed {0}": "롤: 시드 {0}",
+  "item level {0}": "아이템 레벨 {0}",
+  "No roll": "롤 없음",
+  "Level {0}": "레벨 {0}",
+  "Ethereal": "무형",
+  "Equipped": "착용 중",
+  "Inventory": "인벤토리",
+  "Charms": "부적",
+  "Mercenary · {0}": "용병 · {0}",
+  "Mercenary · {0} (active)": "용병 · {0} (활성)",
+  "Shared stash {0}": "공유 보관함 {0}",
+  "Personal stash · {0}": "개인 보관함 · {0}",
+  "Uniques tab": "고유 아이템 탭",
+  "inventory {0}": "인벤토리 {0}",
+  "charm {0}": "부적 {0}",
+  "slot {0}": "칸 {0}",
+  "Paste a save code (it starts with D2S1:) or choose a save file.": "세이브 코드(D2S1:로 시작)를 붙여넣거나 세이브 파일을 고르세요.",
+  "This is not a D2 Survivors save code: it must start with D2S1:": "D2 Survivors 세이브 코드가 아닙니다: D2S1:로 시작해야 합니다",
+  "The save could not be read (no version number).": "세이브를 읽을 수 없습니다 (버전 번호 없음).",
+  "Gold must be a whole number.": "골드는 정수여야 합니다.",
+  "Gold cannot be negative.": "골드는 음수일 수 없습니다.",
+  "{0} is not sold in Hardcore.": "{0}은(는) 하드코어에서 판매되지 않습니다.",
+  "{0}: the save already has level {1} (of {2}).": "{0}: 세이브가 이미 레벨 {1}입니다 (최대 {2}).",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks.": "{0} 레벨 {1} → {2} ({3}): {4} 골드. 보너스 {5} → {6} 랭크.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. You have enough gold.": "{0} 레벨 {1} → {2} ({3}): {4} 골드. 보너스 {5} → {6} 랭크. 골드가 충분합니다.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold.": "{0} 레벨 {1} → {2} ({3}): {4} 골드. 보너스 {5} → {6} 랭크. {7} 골드가 부족합니다.",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold. More than the {8} gold a save can hold: buy it in steps.": "{0} 레벨 {1} → {2} ({3}): {4} 골드. 보너스 {5} → {6} 랭크. {7} 골드가 부족합니다. 세이브가 담을 수 있는 {8} 골드보다 많으니 나눠서 사세요.",
+  "normal rank {0}": "일반 랭크 {0}",
+  "extra rank {0}": "추가 랭크 {0}",
+  "fixed {0}": "고정 {0}",
+  "unknown": "알 수 없음",
+  "unique property": "고유 속성",
+  "runeword / rune": "룬워드 / 룬",
+  "set property": "세트 속성",
+  "prefix": "접두사",
+  "suffix": "접미사",
+  "base": "베이스",
+  "needs item level {0}+": "아이템 레벨 {0}+ 필요",
+  "Bases: {0} ({1} base types)": "베이스: {0} (베이스 종류 {1}개)",
+  "Drops from item level {0}": "아이템 레벨 {0}부터 드롭",
+  "Base defense {0}-{1}": "기본 방어력 {0}-{1}",
+  "Required level {0}+": "요구 레벨 {0}+",
+  "From the runes": "룬 구성",
+  "From the runes in a weapon": "무기에 넣은 룬 효과",
+  "From the runes in a helm or body armor": "투구나 갑옷에 넣은 룬 효과",
+  "From the runes in a shield": "방패에 넣은 룬 효과",
+  "With more items of the set worn": "세트 아이템을 더 착용했을 때",
+  "Gold: {0} → {1}": "골드: {0} → {1}",
+  "UNREADABLE": "읽을 수 없음",
+  "Amazon only": "Amazon 전용",
+  "Assassin only": "Assassin 전용",
+  "Barbarian only": "Barbarian 전용",
+  "Druid only": "Druid 전용",
+  "Necromancer only": "Necromancer 전용",
+  "Paladin only": "Paladin 전용",
+  "Sorceress only": "Sorceress 전용",
+  "Helms": "투구",
+  "Amulets": "목걸이",
+  "Body Armor": "갑옷",
+  "Shields": "방패",
+  "Gloves": "장갑",
+  "Belts": "허리띠",
+  "Boots": "신발",
+  "Rings": "반지",
+  "Axes": "도끼",
+  "Swords": "검",
+  "Maces": "둔기",
+  "Scepters": "셉터",
+  "Daggers": "단검",
+  "Throwing Weapons": "투척 무기",
+  "Javelins": "투창",
+  "Spears": "창",
+  "Polearms": "미늘창",
+  "Bows": "활",
+  "Crossbows": "석궁",
+  "Staves": "지팡이",
+  "Wands": "완드",
+  "Orbs": "오브",
+  "Katars": "카타르",
+  "Claws": "클로",
+  "Runewords": "룬워드",
+  "Weapons": "무기"
+ },
+ "zh": {
+  "{0} (set I, in hand)": "{0}（第 I 套，手持）",
+  "{0} (set II, in hand)": "{0}（第 II 套，手持）",
+  "{0} (set I)": "{0}（第 I 套）",
+  "{0} (set II)": "{0}（第 II 套）",
+  "Put weapons and shields into either weapon set": "将武器和盾牌放入任一武器套",
+  "DEV GENERATION: unique or set items with up to 48 stats of your choice, values 1-1000 (Not legit, for testing builds offline)": "DEV GENERATION：最多 48 个自选属性的暗金或套装物品，数值 1-1000（Not legit，用于离线测试构建）",
+  "Runewords on class bases keep the base's own property, like in the game": "职业底材上的符文之语会像游戏中一样保留底材自身属性",
+  "Load a save, change gold, see Charsi's prices and check every item with the game's own rules, then export.": "载入存档，修改金币，查看 Charsi 的价格，并用游戏自身的规则检查每件物品，然后导出。",
+  "Gold &amp; Charsi, items (view), stash, reference, save check and export work here. Item Generator, Runewords, Charms, Skills, Belt, COPY ITEM and DESIGN are previews — <strong>the full version is free on our Discord.</strong>": "这里可用：金币与 Charsi、物品（查看）、储物箱、资料库、存档检查和导出。物品生成器、符文之语、护身符、技能、腰带、复制物品和外观为预览 — <strong>完整版在我们的 Discord 免费提供。</strong>",
+  "GET THE FULL VERSION": "获取完整版",
+  "1. Your save": "1. 你的存档",
+  "In the game open <b>SAVES</b>, copy your save code (it starts with <code>D2S1:</code>) and paste it here. You can also load a code saved in a .txt file, or the game's own <code>save.json</code>.": "在游戏中打开 <b>SAVES</b>，复制你的存档代码（以 <code>D2S1:</code> 开头）并粘贴到这里。也可以载入保存在 .txt 文件中的代码，或游戏自己的 <code>save.json</code>。",
+  "Load Save Code": "载入存档代码",
+  "Load from File…": "从文件载入…",
+  "Paste Clipboard": "粘贴剪贴板",
+  "Clear": "清空",
+  "Character & Mercenary": "角色与佣兵",
+  "Gold & Charsi": "金币与 Charsi",
+  "Items & Modifiers": "物品与属性",
+  "Stash": "储物箱",
+  "Reference": "资料库",
+  "Check save": "检查存档",
+  "Preview & Export": "预览与导出",
+  "Item Generator": "物品生成器",
+  "Runewords & Charms": "符文之语与护身符",
+  "Skills": "技能",
+  "Belt & Potions": "腰带与药剂",
+  "? HOW TO USE EDITOR": "? 编辑器使用说明",
+  "Gold": "金币",
+  "New amount": "新数额",
+  "Apply Gold": "应用金币",
+  "How much gold for…": "需要多少金币…",
+  "Ware": "商品",
+  "up to level": "到等级",
+  "Calculate": "计算",
+  "Add exactly that much gold": "正好添加这么多金币",
+  "Charsi's wares in this save": "此存档中的 Charsi 商品",
+  "Pick an item on the left.": "在左侧选择一件物品。",
+  "All": "全部",
+  "Unique": "暗金",
+  "Set item": "套装物品",
+  "Runeword": "符文之语",
+  "All classes": "所有职业",
+  "The game's own checks for every item (readable, legit) and every hero build.": "游戏对每件物品（可读、legit）和每个英雄构建的自身检查。",
+  "Changes": "改动",
+  "Generate Save Code": "生成存档代码",
+  "Reset Changes": "重置改动",
+  "New save code": "新的存档代码",
+  "Copy the whole code into the game's <b>SAVES</b> menu. Keep your original code too.": "把完整代码复制到游戏的 <b>SAVES</b> 菜单中。也请保留你的原始代码。",
+  "Copy Code": "复制代码",
+  "Save to File…": "保存到文件…",
+  "Save Original to File…": "将原始代码保存到文件…",
+  "Join our Discord": "加入我们的 Discord",
+  "The full version is free there: Item Generator, Runewords, Charms, COPY ITEM, Skills and Belt editors. Updates, help and item requests too.": "完整版在那里免费：物品生成器、符文之语、护身符、复制物品、技能和腰带编辑器。还有更新、帮助和物品请求。",
+  "Join Discord ↗": "加入 Discord ↗",
+  "⚠️ LEADERBOARD WARNING: Modified saves may flag your character. Runs made with an edited character will not count toward leaderboards. Keep an untouched backup of your original save.": "⚠️ 排行榜警告：修改过的存档可能会标记你的角色。使用编辑过的角色进行的游戏不计入排行榜。请保留一份未改动的原始存档备份。",
+  "Follow Just a Polish Guy": "关注 Just a Polish Guy",
+  "Community & support": "社区与支持",
+  "Tutorials & videos": "教程与视频",
+  "Projects & code": "项目与代码",
+  "Follow the project": "关注项目",
+  "Created by Just a Polish Guy · D2 Survivors Save Editor · an independent community project, not affiliated with the game's developers": "作者：Just a Polish Guy · D2 Survivors Save Editor · 独立社区项目，与游戏开发者无关",
+  "Search names or properties, e.g. faster cast": "搜索名称或属性，例如 faster cast",
+  "Gold: {0}": "金币：{0}",
+  "Full version only": "仅限完整版",
+  "{0} is in the full version of the editor.\n\nThe full version is FREE on our Discord: {1}": "{0} 在编辑器的完整版中。\n\n完整版在我们的 Discord 免费提供：{1}",
+  "Loading the game's rules (first visit downloads about 12 MB, then it is cached)…": "正在载入游戏规则（首次访问约下载 12 MB，之后会缓存）…",
+  "Loading the editor's game data…": "正在载入编辑器的游戏数据…",
+  "The editor could not start: {0}. Refresh the page; if it keeps happening, tell us on Discord.": "编辑器无法启动：{0}。请刷新页面；如果反复出现，请在 Discord 告诉我们。",
+  "Ready. Paste your save code and click Load Save Code.": "准备就绪。粘贴你的存档代码并点击载入存档代码。",
+  "Checking for updates…": "正在检查更新…",
+  "YOU HAVE v{0} (WEB) · STABLE v{1} IS AVAILABLE ON DISCORD · CLICK TO JOIN": "你的版本 v{0}（网页）· 稳定版 v{1} 已在 DISCORD 发布 · 点击加入",
+  "YOU HAVE v{0} (WEB) · THE FULL STABLE VERSION IS FREE ON DISCORD · CLICK TO JOIN": "你的版本 v{0}（网页）· 完整稳定版在 DISCORD 免费提供 · 点击加入",
+  "Save loaded: {0}, {1} hero(es), {2} items, {3} gold.": "存档已载入：{0}，{1} 个英雄，{2} 件物品，{3} 金币。",
+  "The game has already marked this save as edited.": "游戏已将此存档标记为已编辑。",
+  "Could not load the save: {0}": "无法载入存档：{0}",
+  "The browser did not allow reading the clipboard. Paste with Ctrl+V into the box instead.": "浏览器不允许读取剪贴板。请用 Ctrl+V 粘贴到输入框。",
+  "Hero:": "英雄：",
+  "lvl {0}": "等级 {0}",
+  "No hero in this save yet.": "此存档中还没有英雄。",
+  "(active)": "（当前）",
+  "{0} item(s) worn": "已装备 {0} 件物品",
+  "skills:": "技能：",
+  "No mercenary hired.": "未雇用佣兵。",
+  "No skills picked yet.": "尚未选择技能。",
+  "Level": "等级",
+  "Difficulty": "难度",
+  "act {0}": "第 {0} 幕",
+  "State": "状态",
+  "Items": "物品",
+  "{0} equipped · {1} in inventory · {2} charms": "已装备 {0} · 物品栏 {1} · 护身符 {2}",
+  "Mercenary": "佣兵",
+  "Editing skills": "编辑技能",
+  "Edit skills": "编辑技能",
+  "Editing the belt and potions": "编辑腰带和药剂",
+  "Edit belt": "编辑腰带",
+  "The game accepts up to {0} gold.": "游戏最多接受 {0} 金币。",
+  "Max ({0})": "最大（{0}）",
+  "Gold set to {0}. Open Preview & Export to make the new save code.": "金币已设为 {0}。打开预览与导出以生成新的存档代码。",
+  "Gold in the save: {0}": "存档中的金币：{0}",
+  "Rank": "等级",
+  "Extra ranks": "额外等级",
+  "Bonus now (ranks)": "当前加成（等级）",
+  "Gold spent": "已花费金币",
+  "Next level costs": "下一级费用",
+  "Gold to max": "升满所需金币",
+  "Each rank gives": "每级效果",
+  "not in Hardcore": "专家模式不出售",
+  "maxed": "已满",
+  "extra:": "额外：",
+  "(less each rank)": "（每级递减）",
+  "Spent at Charsi so far: {0} gold · To max every ware: {1} gold · Gold now: {2} ({3}% of that)": "迄今在 Charsi 花费：{0} 金币 · 全部商品升满需：{1} 金币 · 当前金币：{2}（占其中 {3}%）",
+  "Spent at Charsi so far: {0} gold · every ware is maxed": "迄今在 Charsi 花费：{0} 金币 · 所有商品已升满",
+  "Type a level.": "请输入等级。",
+  "Empty.": "空。",
+  "Pick an item on the left. A green dot means the game sees it as legit, red means it does not.": "在左侧选择一件物品。绿点表示游戏认为它是 legit，红点表示不是。",
+  "Show every stat and its range": "显示每个属性及其范围",
+  "Re-roll to wanted values": "重新随机到想要的数值",
+  "Set values directly": "直接设置数值",
+  "COPY ITEM": "复制物品",
+  "DESIGN": "外观",
+  "Stat in save": "存档中的属性",
+  "Shown in game as": "游戏中显示为",
+  "Value": "数值",
+  "Game range": "游戏范围",
+  "Source": "来源",
+  "Every unique, set item and runeword in the game, with what it can roll. From the game's own tables ({0}).": "游戏中所有暗金、套装物品和符文之语，以及它们可随机到的属性。来自游戏自身的数据表（{0}）。",
+  "{0} item(s)": "{0} 件物品",
+  "set": "套装",
+  "runeword": "符文之语",
+  "Making items in the Item Generator": "在物品生成器中制作物品",
+  "Make this item": "制作此物品",
+  "Checking every item with the game's rules…": "正在用游戏规则检查每件物品…",
+  "Items checked with the game's own rules ({0}):": "已按游戏规则检查物品（{0}）：",
+  "{0} legit": "{0} 件 legit",
+  "{0} to review": "{0} 件需检查",
+  "{0} regenerate exactly from their roll; {1} have no roll and pass the game's range rules.": "{0} 件可根据随机值精确重新生成；{1} 件没有随机值但符合游戏的范围规则。",
+  "UNREADABLE: the game drops this item when it loads the save. NOT LEGIT: the game shows a red \"Not legit\" border; worn, it keeps runs off the ladder.": "无法读取：游戏在载入存档时会删除此物品。NOT LEGIT：游戏会显示红色“Not legit”边框；装备后会使记录无法进入天梯。",
+  "Result": "结果",
+  "Where": "位置",
+  "Item": "物品",
+  "Why": "原因",
+  "Hero builds": "英雄构建",
+  "All hero builds pass the game's build check.": "所有英雄构建都通过了游戏的构建检查。",
+  "Gold is over the game's limit of {0}.": "金币超过了游戏上限 {0}。",
+  "No changes yet. Change the gold in Gold & Charsi first.": "尚无改动。请先在金币与 Charsi 中修改金币。",
+  "Changes discarded.": "已放弃改动。",
+  "No changes": "没有改动",
+  "Hero build check": "英雄构建检查",
+  "The game's build check rejects these hero builds (the game reports them and keeps the save off the leaderboard):": "游戏的构建检查拒绝以下英雄构建（游戏会报告它们，存档也不会进入排行榜）：",
+  "Export anyway?": "仍要导出？",
+  "Items the game cannot read": "游戏无法读取的物品",
+  "The game will DROP these items when it loads the save:": "游戏在载入存档时会删除以下物品：",
+  "New save code generated. Copy it into the game's SAVES menu.": "已生成新的存档代码。把它复制到游戏的 SAVES 菜单中。",
+  "Share Generated Save?": "分享生成的存档？",
+  "Save Submitted": "存档已提交",
+  "Save Submission Failed": "存档提交失败",
+  "Your save was generated and can still be used normally. Uploading it to the database failed.": "你的存档已生成，可正常使用。上传到数据库失败。",
+  "Details: {0}": "详情：{0}",
+  "Could not generate the save: {0}": "无法生成存档：{0}",
+  "Copied. Paste it into the game's SAVES menu.": "已复制。请粘贴到游戏的 SAVES 菜单中。",
+  "Copied.": "已复制。",
+  "Original": "原值",
+  "full version": "完整版",
+  "Preview of what the full editor does:": "完整编辑器功能预览：",
+  "The full version is free on our Discord, together with updates, help and item requests.": "完整版在我们的 Discord 免费提供，还有更新、帮助和物品请求。",
+  "GET THE FULL VERSION ON DISCORD": "在 DISCORD 获取完整版",
+  "How to use the web editor": "网页编辑器使用说明",
+  "<b>Load your save.</b> In the game open <b>SAVES</b>, copy the code (starts with <code>D2S1:</code>), paste it at the top and click <b>Load Save Code</b>. Keep the original code somewhere safe.": "<b>载入存档。</b>在游戏中打开 <b>SAVES</b>，复制代码（以 <code>D2S1:</code> 开头），粘贴到顶部并点击<b>载入存档代码</b>。请把原始代码保存在安全的地方。",
+  "<b>Pick a hero</b> in the bar above the tabs. Character &amp; Mercenary shows the level, skills and mercenary.": "在标签上方的横条中<b>选择英雄</b>。角色与佣兵会显示等级、技能和佣兵。",
+  "<b>Gold &amp; Charsi:</b> type a new amount and click <b>Apply Gold</b>, or use the quick buttons. The table shows every Charsi ware in your save: ranks, gold spent, the next price and the gold to max. \"How much gold for…\" tells you the exact price of any level.": "<b>金币与 Charsi：</b>输入新数额并点击<b>应用金币</b>，或使用快捷按钮。表格显示存档中每件 Charsi 商品：等级、已花费金币、下一级价格以及升满所需金币。“需要多少金币…”会告诉你任意等级的准确价格。",
+  "<b>Items &amp; Modifiers / Stash:</b> click an item to see its tooltip like in the game, and whether the game sees it as legit. \"Show every stat and its range\" lists each stat with the range the game allows.": "<b>物品与属性 / 储物箱：</b>点击物品即可看到与游戏一致的提示，以及游戏是否认为它是 legit。“显示每个属性及其范围”会列出每个属性及游戏允许的范围。",
+  "<b>Reference:</b> every unique, set item and runeword with its ranges. Search by name or by property (\"faster cast\").": "<b>资料库：</b>所有暗金、套装物品和符文之语及其范围。可按名称或属性（“faster cast”）搜索。",
+  "<b>Check save:</b> runs the game's own checks on every item and hero build.": "<b>检查存档：</b>对每件物品和每个英雄构建运行游戏自身的检查。",
+  "<b>Preview &amp; Export:</b> review the changes, click <b>Generate Save Code</b>, copy the new code and paste it into the game's <b>SAVES</b> menu.": "<b>预览与导出：</b>检查改动，点击<b>生成存档代码</b>，复制新代码并粘贴到游戏的 <b>SAVES</b> 菜单中。",
+  "Language": "语言",
+  "Click the globe and flag in the top-right corner and pick English, Polski, Deutsch, Français, 한국어 or 简体中文. The page switches at once and remembers the choice. Item, skill and class names stay as the game shows them.": "点击右上角的地球和国旗，选择 English、Polski、Deutsch、Français、한국어 或 简体中文。页面会立即切换并记住你的选择。物品、技能和职业名称保持游戏中的显示。",
+  "Update notice": "更新提示",
+  "The badge at the top shows the newest stable version. The stable version with every feature is free on our Discord; click the badge to join.": "顶部的标记显示最新稳定版。包含全部功能的稳定版在我们的 Discord 免费提供；点击标记即可加入。",
+  "Your data": "你的数据",
+  "Everything runs in your browser: your save is not uploaded anywhere. After every export the editor asks whether you want to share the save with the editor's database; nothing is sent unless you click <b>Yes</b>.": "一切都在你的浏览器中运行：你的存档不会上传到任何地方。每次导出后，编辑器会询问你是否愿意把存档分享到编辑器的数据库；除非你点击<b>是</b>，否则不会发送任何内容。",
+  "Good to know": "须知",
+  "The editor is made for offline fun, not for the ladder: the game marks edited saves, and runs with them don't count towards leaderboards.": "编辑器仅供离线娱乐，不用于天梯：游戏会标记编辑过的存档，使用它们进行的游戏不计入排行榜。",
+  "Re-rolling items": "重新随机物品",
+  "Setting item values": "设置物品数值",
+  "DESIGN (item pictures)": "外观（物品图片）",
+  "Discard every change and go back to the loaded save?": "放弃所有改动并回到载入时的存档？",
+  "Nothing was changed. Generate the save code anyway?": "没有任何改动。仍要生成存档代码吗？",
+  "Would you like to submit this generated save to our database to help improve D2 Survivors Save Editor?\n\nData to be submitted:\n• Full generated save code\n• Player nickname read from the save (the actual nickname will not be displayed)\n• Editor version\n• Submission date\n\nSubmission is optional. Choosing No will not affect your save.": "你愿意把这个生成的存档提交到我们的数据库，帮助改进 D2 Survivors Save Editor 吗？\n\n将提交的数据：\n• 完整的生成存档代码\n• 从存档读取的玩家昵称（实际昵称不会显示）\n• 编辑器版本\n• 提交日期\n\n提交是可选的。选择否不会影响你的存档。",
+  "Thank you! Your save has been submitted to the database.": "谢谢！你的存档已提交到数据库。",
+  "The save was loaded from a save.json file - keep that file as your original.": "存档是从 save.json 文件载入的 - 请保留该文件作为原始存档。",
+  "Unique, set, rare, magic and white items made exactly like the game makes them (they stay legit)": "完全按照游戏方式制作的暗金、套装、亮金、魔法和白色物品（保持 legit）",
+  "Pick the exact rolls you want; rares with up to 6 chosen affixes and an exact affix count": "精确选择想要的属性；亮金物品最多 6 个指定词缀并可设定准确词缀数量",
+  "COPY ITEM: copy any item to any hero's inventory, gear, mercenary or stash, exactly or with a new roll": "复制物品：把任意物品复制到任意英雄的物品栏、装备、佣兵或储物箱，可精确复制或使用新随机值",
+  "DESIGN: pick the picture of rings, amulets and charms": "外观：选择戒指、项链和护身符的图片",
+  "Re-roll items you own to the values you want": "将你拥有的物品重新随机到想要的数值",
+  "Every runeword on every base it can drop on, with the rolls you want": "每个符文之语在其可掉落的每种底材上，带你想要的属性",
+  "Small, Large and Grand charms with the prefix and suffix you want": "带有你想要的前缀和后缀的 Small、Large 和 Grand Charm",
+  "Grand Charms and skillers made the way the game makes them": "按游戏方式制作的超大型护身符和技能词缀",
+  "Change skill levels for every hero": "修改每个英雄的技能等级",
+  "The game's own build check, so builds stay valid": "使用游戏自身的构建检查，构建保持有效",
+  "Search skills by tree, type and name": "按技能树、类型和名称搜索技能",
+  "Fill every belt slot with healing, mana or rejuvenation potions": "用治疗、法力或回复药剂填满每个腰带格",
+  "Set how many of each, within the game's limits": "在游戏限制内设置每种的数量",
+  "Yes": "是",
+  "No": "否",
+  "OK": "确定",
+  "Close": "关闭",
+  "Join Discord": "加入 Discord",
+  "Submission is optional. Choosing No will not affect your save.": "提交是可选的。选择否不会影响你的存档。",
+  "UNREADABLE: the game drops this item when it loads the save ({0})": "无法读取：游戏在载入存档时会删除此物品（{0}）",
+  "NOT LEGIT: {0} (red border in game)": "NOT LEGIT：{0}（游戏中显示红框）",
+  "LEGIT: regenerates exactly from its roll": "LEGIT：可根据随机值精确重新生成",
+  "NOT LEGIT: differs from what its roll makes (red border in game)": "NOT LEGIT：与其随机值生成的结果不同（游戏中显示红框）",
+  "LEGIT: no roll, inside the game's ranges": "LEGIT：无随机值，在游戏范围内",
+  "Roll: seed {0}": "随机值：种子 {0}",
+  "item level {0}": "物品等级 {0}",
+  "No roll": "无随机值",
+  "Level {0}": "等级 {0}",
+  "Ethereal": "无形",
+  "Equipped": "已装备",
+  "Inventory": "物品栏",
+  "Charms": "护身符",
+  "Mercenary · {0}": "佣兵 · {0}",
+  "Mercenary · {0} (active)": "佣兵 · {0}（当前）",
+  "Shared stash {0}": "共享储物箱 {0}",
+  "Personal stash · {0}": "个人储物箱 · {0}",
+  "Uniques tab": "暗金收藏页",
+  "inventory {0}": "物品栏 {0}",
+  "charm {0}": "护身符 {0}",
+  "slot {0}": "格子 {0}",
+  "Paste a save code (it starts with D2S1:) or choose a save file.": "请粘贴存档代码（以 D2S1: 开头）或选择存档文件。",
+  "This is not a D2 Survivors save code: it must start with D2S1:": "这不是 D2 Survivors 的存档代码：必须以 D2S1: 开头",
+  "The save could not be read (no version number).": "无法读取存档（没有版本号）。",
+  "Gold must be a whole number.": "金币必须是整数。",
+  "Gold cannot be negative.": "金币不能为负数。",
+  "{0} is not sold in Hardcore.": "{0} 在专家模式中不出售。",
+  "{0}: the save already has level {1} (of {2}).": "{0}：存档已有等级 {1}（共 {2}）。",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks.": "{0} 从等级 {1} 到 {2}（{3}）：{4} 金币。加成 {5} → {6} 级。",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. You have enough gold.": "{0} 从等级 {1} 到 {2}（{3}）：{4} 金币。加成 {5} → {6} 级。你的金币足够。",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold.": "{0} 从等级 {1} 到 {2}（{3}）：{4} 金币。加成 {5} → {6} 级。还差 {7} 金币。",
+  "{0} from level {1} to {2} ({3}): {4} gold. Bonus {5} → {6} ranks. Missing {7} gold. More than the {8} gold a save can hold: buy it in steps.": "{0} 从等级 {1} 到 {2}（{3}）：{4} 金币。加成 {5} → {6} 级。还差 {7} 金币。超过了存档能容纳的 {8} 金币：请分几次购买。",
+  "normal rank {0}": "普通等级 {0}",
+  "extra rank {0}": "额外等级 {0}",
+  "fixed {0}": "固定 {0}",
+  "unknown": "未知",
+  "unique property": "暗金属性",
+  "runeword / rune": "符文之语 / 符文",
+  "set property": "套装属性",
+  "prefix": "前缀",
+  "suffix": "后缀",
+  "base": "底材",
+  "needs item level {0}+": "需要物品等级 {0}+",
+  "Bases: {0} ({1} base types)": "底材：{0}（{1} 种底材）",
+  "Drops from item level {0}": "物品等级 {0} 起掉落",
+  "Base defense {0}-{1}": "基础防御 {0}-{1}",
+  "Required level {0}+": "需求等级 {0}+",
+  "From the runes": "所需符文",
+  "From the runes in a weapon": "镶嵌在武器中的符文效果",
+  "From the runes in a helm or body armor": "镶嵌在头盔或盔甲中的符文效果",
+  "From the runes in a shield": "镶嵌在盾牌中的符文效果",
+  "With more items of the set worn": "穿戴更多该套装物品时",
+  "Gold: {0} → {1}": "金币：{0} → {1}",
+  "UNREADABLE": "无法读取",
+  "Amazon only": "仅限 Amazon",
+  "Assassin only": "仅限 Assassin",
+  "Barbarian only": "仅限 Barbarian",
+  "Druid only": "仅限 Druid",
+  "Necromancer only": "仅限 Necromancer",
+  "Paladin only": "仅限 Paladin",
+  "Sorceress only": "仅限 Sorceress",
+  "Helms": "头盔",
+  "Amulets": "项链",
+  "Body Armor": "盔甲",
+  "Shields": "盾牌",
+  "Gloves": "手套",
+  "Belts": "腰带",
+  "Boots": "靴子",
+  "Rings": "戒指",
+  "Axes": "斧",
+  "Swords": "剑",
+  "Maces": "钉锤",
+  "Scepters": "权杖",
+  "Daggers": "匕首",
+  "Throwing Weapons": "投掷武器",
+  "Javelins": "标枪",
+  "Spears": "长矛",
+  "Polearms": "长柄武器",
+  "Bows": "弓",
+  "Crossbows": "弩",
+  "Staves": "法杖",
+  "Wands": "魔杖",
+  "Orbs": "法珠",
+  "Katars": "拳剑",
+  "Claws": "爪",
+  "Runewords": "符文之语",
+  "Weapons": "武器"
+ }
+};
+</script>
+<script>
+"use strict";
+const ICONS = {"en": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAD5UlEQVR4XrVUbUxbZRR+7ntvS1lb6NjcTBaJUJjDr+BSXWSIynQwlyzBDxaZDQONbGXBfcQBQT7m3ELUBIhumkgMCWokBtzUkEkUFZhWMNAhg9XBAJchAqVAWy4fvfeY+1a2LNOfO8m5OTnnfd/nOc85uQKALNxmy7pWUE4Xtu0h5Y8h6rwyRQ/vOE6ItJNodRBbn0s/9Y/RxNET1CbEcNdiLcfW5ZAuPp9gsdPGpGL6tnuUaHyC+jLyaNh+kDTyTCM/XXgICUWvwrW7ADFNjXA2v4E3K+0Ql5ah+mQwJtzSo5ZT5SUsz8koOLwLPedP4tGLXfjt6WzEZKaD1ZzkdzjAluQinJrS4aG2BsiDI+h/6iWUpm2Es6MSiTYr5IUgmHADRHtcy8XErsf3LcdQk5+Kq8/vx8TXrbC11qNpbTxsycXXSWVhTTZBeJZs6cep0z1Ofzd8Q10PpJOnqpb8k17yzARoJL+UOkQr99EDZTTu8dHk2BT5P2mkzvvS6NrpehoY9dD2PTUE9hxhtZ1LJGkwbe2VECWG2Wk/tOy6zJ3cvT86YYyKgJExzEgiBNKqQFBkiI4yATBhJvoubHY2QTStgueqFwWOZ1BWthuqSkhJqAcH2FT3MUDEQZaXFQxpuofpwUxGTH/RzGv+X3vAwg0cwNfehSFHKSejs0TA23QOqryAtUYDNoTpoAQV4F9FOcCld2qv6yUIQkhvIhCpEJgYGpYhDIJex2PZPYzAhUs8JlXldyAIUPmdUJcrxod8k63U+VBDQP9rK7WVBfiPoyGJXn+FP8REBlIJcz6ZM5FWR/LW1cUlLpHGXLPwe2Jh2pIIQafj2iveWX7ebA6HJDIoiso7wtslIYCBvTmQJBF+nwyJCUhNjOYPzTpdCLvzDhju3oDhg8cQcA3wvDnZhtiacgSnvPD3X4Yl5RGe/3lgDHP+RURYjFCCKgfgEj3+RAm2JjiQu7ca/sACAoN/ondnLqara8GUIObnF4Gl5RArbUbBIGZ9MpbmZQQavkLPY5nwdV+EohKOHK7F1k0OpKQUhWbHvwLwWsWLuNxbhdSRPrhfcCDOvgv6D99FRsVZ/DI4CXOEEYqqcjebV6Fr2INt++owV1qI+8sPYCivGPe2NKOv/QTeOr0PeoP+BkDLuQpUO57ESEYe/jrzHTa31KExKg6JyUVobuiAXi/dtB3athj0Epw/9MKWdBTvTUh4sPUzBNxX8HtqFkq2x+N8eyUH4DNIcrvQ/fJHsB7KgXdHGjJKPsWZz9sBiwniGvMtq6eZBsIijVgQGI7s/wBnv0zE+1WFiOtzoTuzANbsjBVxbu/v+h9g/sJXrDbnmwAAAABJRU5ErkJggg==", "pl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAAXElEQVR4XmNkYGCIYqAhYAGZ/f///6W0sIORkTGaiRYGI4OhbwE4Dhj+/6dZSEEsYGSkrQX/PnymrQUPTcNpa8HfNx9oawEjKyQqaAFonoqGfkajuQ9AOYymxTUAAYIQEg3nJFIAAAAASUVORK5CYII=", "de": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAAb0lEQVR4XmNkYGCIYqAhYIGavZRGdkQz0chgOAD7gFa2/GNggFgAYtAKgC1YQiPTY2A+cKWRBSAA9sFHWlvAwkwjG/5CffD3L40sgAURvy+NLNgM9YFoP40t+P+eRhbAgoiRVpFMw1ICDhhpXVwDAAOFDXXzUB7cAAAAAElFTkSuQmCC", "fr": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAAaUlEQVR4XmNkYGCIYqAhYAGbHbpkKbIdjIwMDP///GMQ5ONguDvFn0GQm43h/38GsDgYQDn/P39i+BQTxPD/wzsGBhZWiDgSENx/OpqJho4Hg1ELCILRICIIRoOIIBgNIoIAVD7StLgGACecFtUzhasVAAAAAElFTkSuQmCC", "ko": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAADR0lEQVR4XrVUXUxTZxh+jiUx1NGEZCQmzRBFSmdJbZeoBTShIw0Xxt0uAXVNzOCiCxd6MbK7XeiVYfPCmBDCFhOjBq6MhAGxWOiybEDKT8EMERqHIQaQYHvoqOd8j/k+PFUnmt34Juec75zzvs/z/bzPowFoxEeORpIUQsgHZ2dn1VOGaZr5sQqZ8ypvpxyr1sKyJt9oAQ0PD9Pr9XJhYYGpVOoV5jaoeJNMjk0zDyRzFxcX6ff7OTQ0pOoMw3ibIJfL0e12MxqNsqGhgT09PYzH4zQN4/VsdZ1GOv363TA4MjLC7u5u1tfXc3Jykm1tbdR1Xa1erkCTN5I3mpub4XQ6Ybfbsbq6CofDgempKdy6fRvZx/9g+edryCSmACFQ6HZhb2sLijyf43RTE7w+H56traGkpATZbBapVAqdnZ3QNK1JHq/aooGBAfb19bG2tpaxWIyugxXMpDPMPPibiZoQ/yz1cOzQMf7lCXCszMOxw8e5MTXDjJ7hhfPnOTo6ykAgwN7eXoVlrUARWIcyPT3NRCLBmppq9vf9prZiLnKBf3zm4fiRIMcO1/KB9yjjR0Ic31/Fh1+fVTnRe1FWV1er2mQymT87iV0gGTRNg2maqKqqUg3b1fULKisrsfwvEX+URt0eGzZyW7CLHC46TuDuHg/KPlnDpUf3UfZkCcEvg/i1qwsut1vVSyybzabGiuB9USAELtuPwix8Cg/X0Vnkx3XHMUBs4VnhAfzETTQYWx9U0S75l6RiTCaTmJiYQDgcRn//AErsNnzqKsW39lM46fwGVx01sIksdhcAu/TnMPaVAfvKce9+DGfDYVU7MzOjsCSmjDzB4OAglpaW0Nraivb2dkQi30HXN3HlnB/2ogKsPyc05mBCw1bmBQQFfogEkc1u4u6dO+jo6EAkElEdJLEsgnybtrS0oLi4GHV1dVhZWcHc3Bwezs/j1s2b+H32Kb6/NorxhXUIEoecDvx47gt8FSjF6TNn4KqoQHl5uWrTWCym6iXhW21qCU0qMRQK5YX24g2hLS6nOf9kIy80+c8SWjAY3FFoeR3IeJ9VmKb4rwXRUN+2/cuyCp/Pt7NV/F+zM4VQ1zbsu4a4k9mpM/iYbv0S+6kqEdecuSUAAAAASUVORK5CYII=", "zh": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAABUklEQVR4Xu2UT0rDQBTGfzOT2LS1NhXFrQguPIQrQRfeoF7CE7j1DC5EENx4hS5F8ACCK7sWxVZbozVpZmReEBEV20p3fquE8N73531EAU2miMDvbq/FJ1jQsw4M2J7CJoq4OUAFcH9QJli0Y8tYuXrY0X5KhZD3FdX1jNpGSt5TmLojOQtJzkPmtl/RFYcXMS7EgQodC7sv1DYzmdcNy+NpRHZj0GVHbSslbRshVgZwo9OIg7yreWqVMLHF1K085x2NrjpZ1jmKGN5piWuc5R7iwA+ZecvtfgWXKUzD4qW6ZwWBY2kvoXsckV4bVGk8kiKiyDG4DOSwKDBeuXKUVnOJqHNYJu8oudVkDiQnikj8DgtuqJhZzuU9uQgxsScdPft3FBGJDT61xLem35qRT6YxWYM+bvAdvOBi/0T1/OrgB5K/Qmo6TfwT/Apfzqn+rt8AfdNsuyqw+goAAAAASUVORK5CYII=", "globe": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAADCElEQVR4Xq2U3WsUVxjGn+ec2Z1M1oRGYhJUNIvSRNCq4IUtoqaSJoIfII1QTfDKXPtV6EX7H4h4rVdbE4q7KKgXpgYMSOlVoYpaU1Q2bsWqGJOo2c3Mzpy3vBtqrYg3emAu5uX3ezjnPe8M8MYS6bNvvr9vvc3yXfDDsQPr4Fy3E9ksCZYLAGPxwJDXYMzo0q7c9be9WpAI+OjSYBAH5a89Yw41ZtLrEydwIqjGDsYQ1hCGhLXEi1fR77FzJ6cczq39aqhMQjzJ63EKztWFny0IUrkF9Sk8ejJ7GgY+wG5CbhhyowisAAUBkiWLMgdnXkU5G8Y3AVzP5/us0R1pYjmMNvhpiyfPKsey24cHSXYRyDugmDh5KoLzgHyZ7RkafPysfCyos6hUki/U7dMMDSqOHWhrsCyVw+Tysu4zu4sj33Q2N2XuTE7PbRORfSC2WthvGxtS56dexKuyvbnx0ujAhXrfbn+ZyLJsV+7x/I7CpN/3vVQljL67le9LG+EaApIY3iORoiBFi/vaTmPcGmWUVUddzagFCWX308nK7Y4dZ++s3luIxJiWShhzRfeZEmmqILl02483tSYiLcooq466tc3UjjbS/6eftpmwGv/C+dJaEp1OcBYinxNoocElEWo7xgHcEAj8lLcpjJLZbO9Qh1ebB6JqDRcR2AoRCthQq4t0kWgUIA2HLTpPAJYTslCbbA2bQEy/PhqA57OV6kR7z3Bbe+9wq6F8nwk8tPdEiwkWIPhbfK+jzrdwcD8oo6w66r4OouBic1Pdp3dH+leKCA3NROB7Uhq1rTqXJGMmZrHWLMyEMsqqo+5/zfbtUBQlVd/wBEmJXfyHAKzGdhUgsehTjTu1CSnY28ooq466tSCdbJ2DyZnwyMJP/J2lKwNHs70/jU/OzP3lWe4UIoIgIWXX9Mu5iSU6Q1cGjio7NR0dVlcz5q9fwHo//VsYJWhtDo4XL+8/JSJjAuw1QNYatpDYA/Bq8ef+U23N9ccrcwmCwP6qbuHf6/8YH+1H+438b33Ij+0fBW6mAUJs39AAAAAASUVORK5CYII="};
+const APP_VERSION = "10.8 Demo";
+const EDITOR_TAG = "10.8 Web Demo";               // what the database sees as editor_version
+const DISCORD = "https://discord.gg/nENzQxTh4";
+const PY_ZIP = "py.zip?v=10.8";
+const VERSION_API = "https://api.github.com/repos/justPLguy/D2-Survivors-Save-Editor-EXE/contents/version.json";
+const VERSION_RAW = "https://raw.githubusercontent.com/justPLguy/D2-Survivors-Save-Editor-EXE/HEAD/version.json";
+const SUPABASE_FN = "https://vsiidrluknnklxfwgqro.supabase.co/functions/v1/dynamic-endpoint";
+const SUPABASE_KEY = "sb_publishable_EqNLhk6eWrwb2j5dxqf1wQ_lcEO1UuW";
+const CLASSES = ["amazon","assassin","barbarian","druid","necromancer","paladin","sorceress"];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => Number(n).toLocaleString("en-US");
+const title = s => String(s||"").replace(/^./, c => c.toUpperCase());
+let api = null, INFO = null, SUM = null, HERO = null, REF = null, calcGold = 0, outCode = "", origCode = "";
+let STABLE = undefined, BOOT_STATE = "loading", LAST_MSG = null;
+
+// ------------------------------------------------------------------ languages (English is the base; texts are translated on display)
+const LANGS = [["en","English"],["pl","Polski"],["de","Deutsch"],["fr","Français"],["ko","한국어"],["zh","简体中文"]];
+let LANG = "en", EXACT = {}, TEMPL = [];
+const PH = /\{(\d+)\}/g;
+function compile(cat){
+  EXACT = {}; TEMPL = [];
+  for (const [src, dst] of Object.entries(cat || {})){
+    if (!dst) continue;
+    if (/\{\d+\}/.test(src)){
+      const lit = src.replace(PH, "");
+      if ((lit.match(/\p{L}/gu) || []).length < 3) continue;
+      const order = []; let rx = "^";
+      src.split(/(\{\d+\})/).forEach(p => { const m = p.match(/^\{(\d+)\}$/); if (m){ order.push(+m[1]); rx += "([\\s\\S]+?)"; } else rx += p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); });
+      TEMPL.push([new RegExp(rx + "$"), dst, order, lit.length]);
+    } else EXACT[src] = dst;
+  }
+  TEMPL.sort((a, b) => b[3] - a[3]);
+}
+function match(core, depth=0){
+  if (core in EXACT) return EXACT[core];
+  for (const [rx, dst, order] of TEMPL){
+    const m = core.match(rx); if (!m) continue;
+    const vals = {};
+    order.forEach((idx, i) => { const v = m[i+1]; let hit = EXACT[v.trim()];
+      if (hit === undefined && depth < 2 && v.length < core.length && /\p{L}{2}/u.test(v)) hit = match(v.trim(), depth+1);
+      vals[idx] = hit != null ? v.replace(v.trim(), hit) : v; });
+    return dst.replace(PH, (g, n) => vals[n] ?? g);
+  }
+  return null;
+}
+function T(text){
+  if (LANG === "en" || typeof text !== "string" || !text) return text;
+  const m = text.match(/^(\s*)([\s\S]*?)(\s*)$/); const core = m[2];
+  if (!core) return text;
+  let r = match(core);
+  if (r == null && core.includes("\n")){ const lines = core.split("\n"), out = lines.map(T); if (out.some((l, i) => l !== lines[i])) r = out.join("\n"); }
+  return r == null ? text : m[1] + r + m[3];
+}
+const TF = (s, ...v) => T(s).replace(PH, (g, n) => v[n] ?? g);       // T("Gold: {0}") then fill the numbers
+const STATIC = new Map();
+function applyStatic(){
+  document.querySelectorAll("[data-t],[data-th],[data-tp]").forEach(el => {
+    if (!STATIC.has(el)) STATIC.set(el, {t: el.textContent, h: el.innerHTML, p: el.getAttribute("placeholder")});
+    const o = STATIC.get(el);
+    if (el.hasAttribute("data-th")) el.innerHTML = T(o.h.replace(/\s+/g, " ").trim());
+    else if (el.hasAttribute("data-tp")) el.setAttribute("placeholder", T(o.p));
+    else el.textContent = T(o.t);
+  });
+  document.documentElement.lang = LANG === "zh" ? "zh-CN" : LANG;
+}
+function langPicker(){
+  const box = $("lang"), cur = LANGS.find(l => l[0] === LANG) || LANGS[0];
+  box.innerHTML = `<img class="globe" src="${ICONS.globe}" alt="">` +
+    `<button id="langBtn" aria-haspopup="true"><img class="flag" src="${ICONS[cur[0]]}" alt=""> ${cur[1]} ▾</button>` +
+    `<ul id="langList" class="hidden">${LANGS.map(([c, n]) => `<li><button data-l="${c}" class="${c===LANG?"cur":""}"><img class="flag" src="${ICONS[c]}" alt=""> ${n}</button></li>`).join("")}</ul>`;
+  const list = $("langList");
+  const toggle = e => { e.stopPropagation(); list.classList.toggle("hidden"); };
+  $("langBtn").onclick = toggle; box.querySelector(".globe").onclick = toggle;
+  list.querySelectorAll("button").forEach(b => b.onclick = () => { list.classList.add("hidden"); setLang(b.dataset.l); });
+}
+document.addEventListener("click", () => { const l = $("langList"); if (l) l.classList.add("hidden"); });
+function setLang(code, save=true){
+  LANG = LANGS.some(l => l[0] === code) ? code : "en";
+  compile(LANG === "en" ? {} : (I18N[LANG] || {}));
+  if (save){ try{ localStorage.setItem("d2s_lang", LANG); }catch(e){} }
+  langPicker(); applyStatic(); redraw();
+}
+function redraw(){
+  bootText(); badgeText(); lockPages(); helpPage();
+  if (INFO) setupLabels();
+  if (LAST_MSG) say(...LAST_MSG);
+  if (SUM){ const ref = !!REF; renderAll(); if (ref){ refOptions(); refFilter(); } }
+}
+
+// ------------------------------------------------------------------ messages & modal
+// say("English text") or say(() => TF(...)) - kept so a language switch can redo the message
+function say(text, err=false){ LAST_MSG = [text, err]; const m=$("msg"); m.textContent = typeof text === "function" ? text() : T(text); m.classList.toggle("err",!!err); m.classList.remove("hidden"); }
+function modal(head, text, buttons){
+  return new Promise(res => {
+    $("mTitle").textContent = T(head); $("mText").textContent = T(text); const b=$("mBtns"); b.innerHTML="";
+    buttons.forEach(([label, val, cls]) => { const x=document.createElement("button"); x.textContent=T(label); if(cls) x.className=cls;
+      x.onclick=()=>{ $("modal").classList.add("hidden"); res(val); }; b.appendChild(x); });
+    $("modal").classList.remove("hidden");
+  });
+}
+const ask = (h,t) => modal(h,t,[["Yes",true,"primary"],["No",false]]);
+const info = (h,t) => modal(h,t,[["OK",true,"primary"]]);
+function locked(what){
+  return modal("Full version only", TF("{0} is in the full version of the editor.\n\nThe full version is FREE on our Discord: {1}", T(what), DISCORD),
+    [["Join Discord",true,"primary"],["Close",false]]).then(go => { if(go) window.open(DISCORD,"_blank","noopener"); });
+}
+
+// ------------------------------------------------------------------ python bridge
+function call(fn, ...args){
+  try { return JSON.parse(api[fn](...args)); }
+  catch(e){ const t=String(e.message||e).trim().split("\n").filter(Boolean); throw new Error(t[t.length-1].replace(/^\w+Error: /,"")); }
+}
+function bootText(){
+  const el = $("bootText"); if (!el) return;
+  if (BOOT_STATE === "loading") el.textContent = T("Loading the game's rules (first visit downloads about 12 MB, then it is cached)…");
+  else if (BOOT_STATE === "data") el.textContent = T("Loading the editor's game data…");
+  else if (BOOT_STATE && BOOT_STATE.error) el.textContent = TF("The editor could not start: {0}. Refresh the page; if it keeps happening, tell us on Discord.", BOOT_STATE.error);
+}
+async function boot(){
+  try{
+    const py = await loadPyodide();
+    BOOT_STATE = "data"; bootText();
+    const buf = await (await fetch(PY_ZIP)).arrayBuffer();
+    py.unpackArchive(buf, "zip", {extractDir: "/home/pyodide/app"});
+    py.runPython("import sys; sys.path.insert(0, '/home/pyodide/app')");
+    api = py.pyimport("web_api");
+    INFO = JSON.parse(api.init());
+    BOOT_STATE = "ready";
+    $("boot").classList.add("hidden");
+    ["btnLoad","btnFile","btnPaste"].forEach(id => $(id).disabled = false);
+    say("Ready. Paste your save code and click Load Save Code.");
+    setupStatic();
+  }catch(e){
+    BOOT_STATE = {error: String(e.message||e)}; $("boot").classList.add("err"); bootText();
+    const s = document.querySelector("#boot .spin"); if (s) s.remove();
+  }
+}
+
+// ------------------------------------------------------------------ update badge
+function parseVer(t){ const m=String(t||"").match(/^\s*(\d+(?:\.\d+){0,3})/); return m ? m[1].split(".").map(Number) : null; }
+async function fetchStable(){
+  const tries = [[VERSION_API, {headers:{Accept:"application/vnd.github.raw+json"}}], [VERSION_RAW + "?t=" + Date.now(), {}]];
+  for (const [url, opt] of tries){
+    try{ const r = await fetch(url, {...opt, cache:"no-store"}); if(!r.ok) continue;
+      const j = await r.json(); const v = typeof j.stable === "string" ? j.stable.trim() : null;
+      if (v && /^\d+(\.\d+){0,3}$/.test(v)) return v; }catch(e){}
+  }
+  return null;
+}
+function badgeText(){
+  const b=$("badge");
+  if (STABLE === undefined){ b.textContent = T("Checking for updates…"); return; }
+  b.className="new";
+  b.textContent = STABLE ? TF("YOU HAVE v{0} (WEB) · STABLE v{1} IS AVAILABLE ON DISCORD · CLICK TO JOIN", APP_VERSION.toUpperCase(), parseVer(STABLE).join("."))
+                         : TF("YOU HAVE v{0} (WEB) · THE FULL STABLE VERSION IS FREE ON DISCORD · CLICK TO JOIN", APP_VERSION.toUpperCase());
+  b.onclick = () => window.open(DISCORD,"_blank","noopener");
+}
+async function updateBadge(){ STABLE = await fetchStable(); badgeText(); }
+
+// ------------------------------------------------------------------ load
+async function loadText(text){
+  try{
+    SUM = call("load", text);
+    origCode = text.trim().startsWith("{") ? "" : text.trim();
+    outCode = ""; $("outWrap").classList.add("hidden");
+    HERO = (SUM.heroes.find(h=>h.in_run) || SUM.heroes[0] || {}).cls || null;
+    $("work").classList.remove("hidden");
+    const s = SUM;
+    say(() => TF("Save loaded: {0}, {1} hero(es), {2} items, {3} gold.", T(s.mode), s.heroes.length, fmt(s.items), fmt(s.gold))
+              + (s.edited ? "\n" + T("The game has already marked this save as edited.") : ""));
+    renderAll();
+  }catch(e){ const m = e.message; say(() => TF("Could not load the save: {0}", T(m)), true); }
+}
+$("btnLoad").onclick = () => loadText($("code").value);
+$("btnFile").onclick = () => $("file").click();
+$("file").onchange = async e => { const f=e.target.files[0]; if(!f) return; const t=await f.text(); $("code").value = t.trim().startsWith("{") ? "" : t.trim(); await loadText(t); e.target.value=""; };
+$("btnPaste").onclick = async () => { try{ $("code").value = (await navigator.clipboard.readText()).trim(); await loadText($("code").value); }catch(e){ say("The browser did not allow reading the clipboard. Paste with Ctrl+V into the box instead.", true); } };
+$("btnClear").onclick = () => { $("code").value=""; };
+
+// ------------------------------------------------------------------ tabs & heroes
+$("tabs").addEventListener("click", e => {
+  const t=e.target.closest(".tab"); if(!t) return;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active", x===t));
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active", p.id==="p-"+t.dataset.p));
+  if(t.dataset.p==="export") renderChanges();
+  if(t.dataset.p==="ref") renderRef();
+});
+function renderAll(){ renderHeroes(); renderChar(); renderGold(); renderItems(); renderStash(); renderChanges(); $("checkOut").innerHTML=""; }
+function renderHeroes(){
+  $("heroes").innerHTML = `<span class="small">${esc(T("Hero:"))}</span>` + SUM.heroes.map(h =>
+    `<button class="hero ${h.cls===HERO?"active":""}" data-c="${h.cls}">${title(h.cls)}${h.level?` <span class="pill">${esc(TF("lvl {0}", h.level))}</span>`:""}</button>`).join("")
+    + `<span class="small" style="margin-left:auto">${esc(T("Gold"))} <b style="color:var(--gold)">${fmt(SUM.gold)}</b> · ${esc(T(SUM.mode))}${SUM.nickname?` · ${esc(SUM.nickname)}`:""}</span>`;
+  $("heroes").querySelectorAll(".hero").forEach(b => b.onclick = () => { HERO=b.dataset.c; renderHeroes(); renderChar(); renderItems(); });
+}
+function renderChar(){
+  const h = SUM.heroes.find(x=>x.cls===HERO);
+  if(!h){ $("p-char").innerHTML=`<p>${esc(T("No hero in this save yet."))}</p>`; return; }
+  const mercs = h.mercs.length ? h.mercs.map(m=>`<li>${title(m.type)}${m.active?` <b>${esc(T("(active)"))}</b>`:""} · ${esc(TF("{0} item(s) worn", m.items))}${m.picks.length?" · "+esc(T("skills:"))+" "+m.picks.map(esc).join(", "):""}</li>`).join("") : `<li>${esc(T("No mercenary hired."))}</li>`;
+  const skills = h.skills.length ? h.skills.map(([id,l])=>`<span class="pill" style="margin:2px">${esc(id)} ${l}</span>`).join("") : `<span class='small'>${esc(T("No skills picked yet."))}</span>`;
+  $("p-char").innerHTML = `<h2>${title(h.cls)}</h2>
+    <table style="max-width:640px"><tr><th>${esc(T("Level"))}</th><td>${h.level ?? "-"}</td></tr><tr><th>${esc(T("Difficulty"))}</th><td>${esc(title(h.difficulty||"-"))}${h.act?` · ${esc(TF("act {0}", h.act))}`:""}</td></tr>
+    <tr><th>${esc(T("State"))}</th><td>${esc(T(h.in_run?"In a run":"Between runs"))}</td></tr><tr><th>${esc(T("Items"))}</th><td>${esc(TF("{0} equipped · {1} in inventory · {2} charms", h.equipped, h.inventory, h.charms))}</td></tr></table>
+    <h3 style="margin-top:14px">${esc(T("Skills"))}</h3><div>${skills}</div>
+    <h3 style="margin-top:14px">${esc(T("Mercenary"))}</h3><ul>${mercs}</ul>
+    <div class="row"><button class="lock" onclick="locked('Editing skills')">${esc(T("Edit skills"))}</button><button class="lock" onclick="locked('Editing the belt and potions')">${esc(T("Edit belt"))}</button></div>`;
+}
+
+// ------------------------------------------------------------------ gold & charsi
+function setupLabels(){
+  $("goldCap").textContent = TF("The game accepts up to {0} gold.", fmt(INFO.gold_cap));
+  $("goldQuick").innerHTML = [["+1M",1e6],["+10M",1e7],["+100M",1e8],["+1B",1e9]].map(([l,n])=>`<button data-n="${n}">${l}</button>`).join("") + `<button data-max="1">${esc(TF("Max ({0})", fmt(INFO.gold_cap)))}</button>`;
+  $("goldQuick").querySelectorAll("button").forEach(b => b.onclick = () => setGold(b.dataset.max ? INFO.gold_cap : SUM.gold + Number(b.dataset.n)));
+}
+function setupStatic(){
+  setupLabels();
+  $("calcWare").innerHTML = INFO.wares.map(w=>`<option value="${w.key}">${esc(w.name)}</option>`).join("");
+  $("calcWare").onchange = () => { if(SUM){ $("calcLvl").value = api.charsi_default_level($("calcWare").value); calc(); } };
+  $("calcLvl").oninput = calc; $("calcGo").onclick = calc;
+  $("calcAdd").onclick = () => calcGold && setGold(SUM.gold + calcGold);
+  $("goldApply").onclick = () => setGold($("goldIn").value);
+}
+function setGold(v){
+  try{ SUM = call("set_gold", String(Math.min(INFO.gold_cap, Math.max(0, Number(String(v).replace(/[ ,_]/g,"")))) || 0));
+       const g = SUM.gold; say(() => TF("Gold set to {0}. Open Preview & Export to make the new save code.", fmt(g))); renderHeroes(); renderGold(); renderChanges(); }
+  catch(e){ say(e.message, true); }
+}
+function renderGold(){
+  $("goldNow").textContent = TF("Gold in the save: {0}", fmt(SUM.gold)); $("goldIn").value = SUM.gold;
+  const c = call("charsi");
+  const th = (s, num) => `<th${num?' class="num"':""}>${esc(T(s))}</th>`;
+  $("charsiTbl").innerHTML = `<tr>${th("Ware")}${th("Rank",1)}${th("Extra ranks",1)}${th("Bonus now (ranks)",1)}${th("Gold spent",1)}${th("Next level costs",1)}${th("Gold to max",1)}${th("Each rank gives")}</tr>` +
+    c.rows.map(r => `<tr><td>${esc(r.name)}</td><td class="num">${r.top?`${r.ranks}/${r.maxRank}`:"-"}</td><td class="num">${!r.top?esc(T("not in Hardcore")):r.endless?`${r.extra}/${c.max_extra}`:"-"}</td>
+      <td class="num">${r.bonus.toFixed(2)} / ${r.bonus_max.toFixed(2)}</td><td class="num">${fmt(r.spent)}</td><td class="num">${r.next==null?esc(T("maxed")):fmt(r.next)}</td><td class="num">${fmt(r.to_max)}</td>
+      <td>${esc((r.describe||"").replace(/\n/g,"; "))}${r.endless?` · ${esc(T("extra:"))} ${esc(r.endless.replace(/\n/g,"; "))} ${esc(T("(less each rank)"))}`:""}</td></tr>`).join("");
+  $("charsiTot").textContent = c.to_max ? TF("Spent at Charsi so far: {0} gold · To max every ware: {1} gold · Gold now: {2} ({3}% of that)", fmt(c.spent), fmt(c.to_max), fmt(c.gold), (c.gold/c.to_max*100).toFixed(2))
+                                       : TF("Spent at Charsi so far: {0} gold · every ware is maxed", fmt(c.spent));
+  if(!$("calcLvl").value) $("calcLvl").value = api.charsi_default_level($("calcWare").value);
+  calc();
+}
+function calc(){
+  calcGold = 0; $("calcAdd").disabled = true; if(!SUM) return;
+  const v = parseInt($("calcLvl").value,10); if(!v){ $("calcOut").textContent=T("Type a level."); return; }
+  try{ const r = call("charsi_calc", $("calcWare").value, v); $("calcOut").textContent = T(r.text); calcGold = r.cost; $("calcAdd").disabled = !r.cost; }
+  catch(e){ $("calcOut").textContent = T(e.message); }
+}
+
+// ------------------------------------------------------------------ items
+function itemList(groups, listEl, viewEl){
+  const all = [];
+  listEl.innerHTML = groups.map(g => `<div class="grp">${esc(T(g.title))} <span class="pill">${g.items.length}</span></div>` +
+    (g.items.length ? g.items.map(it => { all.push(it); return `<button class="it" data-i="${all.length-1}"><span class="dot ${it.status}"></span><span class="nm r-${esc(it.rarity)}">${esc(it.name)}</span><span class="wh">${esc(T(it.where))}</span></button>`; }).join("") : `<p class="small">${esc(T("Empty."))}</p>`)).join("");
+  listEl.querySelectorAll(".it").forEach(b => b.onclick = () => { listEl.querySelectorAll(".it").forEach(x=>x.classList.toggle("sel",x===b)); showItem(all[+b.dataset.i], viewEl); });
+  viewEl.innerHTML = `<p>${esc(T("Pick an item on the left. A green dot means the game sees it as legit, red means it does not."))}</p>`;
+}
+function renderItems(){ if(HERO) itemList(call("hero_items", HERO), $("itemList"), $("itemView")); }
+function renderStash(){ itemList(call("stash"), $("stashList"), $("stashView")); }
+function showItem(it, el){
+  const lines = it.lines.map(([t,k]) => `<div class="l ${k}">${esc(t)}</div>`).join("");
+  el.innerHTML = `<div class="tip ${it.status==="bad"?"bad":""}"><div class="t1 r-${esc(it.rarity)}">${esc(it.name)}</div><div class="t2 r-${esc(it.rarity)}">${esc(it.base)}</div>${lines}</div>
+    <div class="verdict ${it.status}">${esc(T(it.status_text))}</div>
+    <p class="small">${esc(title(it.rarity))} · ${esc(it.base)} · ${esc(T(it.where))} · ${esc(it.meta.split(" · ").map(T).join(" · "))}</p>
+    <div class="row" style="margin:8px 0">
+      <button id="detBtn">${esc(T("Show every stat and its range"))}</button>
+      <button class="lock" data-l="Re-rolling items">${esc(T("Re-roll to wanted values"))}</button>
+      <button class="lock" data-l="Setting item values">${esc(T("Set values directly"))}</button>
+      <button class="lock" data-l="COPY ITEM">${esc(T("COPY ITEM"))}</button>
+      <button class="lock" data-l="DESIGN (item pictures)">${esc(T("DESIGN"))}</button>
+    </div><div id="det"></div>`;
+  el.querySelectorAll("button.lock").forEach(b => b.onclick = () => locked(b.dataset.l));
+  el.querySelector("#detBtn").onclick = () => {
+    try{ const d = call("item_detail", JSON.stringify(it.path));
+      el.querySelector("#det").innerHTML = (d.notes||[]).map(n=>`<p style="color:var(--orange)">${esc(T(n))}</p>`).join("") +
+        `<div class="tablewrap"><table><tr><th>${esc(T("Stat in save"))}</th><th>${esc(T("Shown in game as"))}</th><th class="num">${esc(T("Value"))}</th><th>${esc(T("Game range"))}</th><th>${esc(T("Source"))}</th></tr>` +
+        d.rows.map(r=>`<tr><td>${esc(r.stat)}</td><td>${esc(r.shown)}</td><td class="num">${esc(r.value)}</td><td>${esc(T(r.range))}</td><td class="small">${esc(T(r.source))}</td></tr>`).join("") + "</table></div>";
+    }catch(e){ el.querySelector("#det").innerHTML = `<p class="err">${esc(T(e.message))}</p>`; }
+  };
+}
+
+// ------------------------------------------------------------------ reference
+function refOptions(){
+  const cats=[...new Set(REF.map(r=>r.catLabel))].filter(Boolean).sort(), cat=$("refCat").value, cls=$("refCls").value;
+  $("refCat").innerHTML = `<option value="All">${esc(T("All"))}</option>` + cats.map(c=>`<option value="${esc(c)}">${esc(T(c))}</option>`).join("");
+  $("refCls").innerHTML = `<option value="All classes">${esc(T("All classes"))}</option>` + CLASSES.map(c=>`<option value="${c}">${esc(T(title(c)+" only"))}</option>`).join("");
+  if (cat) $("refCat").value = cat; if (cls) $("refCls").value = cls;
+  $("refInfo").textContent = TF("Every unique, set item and runeword in the game, with what it can roll. From the game's own tables ({0}).", INFO.game_version);
+}
+function renderRef(){
+  if(REF) return;
+  REF = call("reference_list");
+  refOptions();
+  ["refKind","refCat","refCls"].forEach(id => $(id).onchange = refFilter); $("refQ").oninput = refFilter;
+  refFilter();
+}
+function refFilter(){
+  const k={"All":null,"Unique":"unique","Set item":"set","Runeword":"runeword"}[$("refKind").value], cat=$("refCat").value, cls=$("refCls").value, q=$("refQ").value.trim().toLowerCase();
+  const rows = REF.filter(r => (!k||r.kind===k) && (cat==="All"||r.catLabel===cat) && (cls==="All classes"||r.cls===cls) && (!q||r.search.includes(q)));
+  $("refCount").textContent = TF("{0} item(s)", rows.length);
+  $("refList").innerHTML = rows.slice(0,600).map((r,i)=>`<button class="it" data-k="${r.kind}" data-n="${esc(r.name)}"><span class="nm r-${r.kind}">${esc(r.name)}</span><span class="wh">${r.kind==="set"?esc(T("set"))+" · ":r.kind==="runeword"?esc(T("runeword"))+" · ":""}${esc(r.base)}</span></button>`).join("");
+  $("refList").querySelectorAll(".it").forEach(b => b.onclick = () => { $("refList").querySelectorAll(".it").forEach(x=>x.classList.toggle("sel",x===b)); refCard(b.dataset.k, b.dataset.n); });
+}
+function refCard(kind, name){
+  const c = call("reference_card", kind, name);
+  $("refCard").innerHTML = `<div class="t1 r-${kind}">${esc(c.name)}</div>` + c.meta.map(m=>`<p>${esc(m.split(" · ").map(T).join(" · "))}</p>`).join("") +
+    `<div style="margin-top:8px">${c.props.map(p=>`<div class="prop">${esc(p)}</div>`).join("")}</div>` +
+    c.sections.map(s=>`<h3 style="margin-top:12px;color:var(--gold)">${esc(T(s.title))}</h3>${s.sub?`<p>${esc(s.sub)}</p>`:""}${s.lines.map(l=>`<div class="${s.kind}">${esc(l)}</div>`).join("")}`).join("") +
+    `<div class="row" style="margin-top:12px"><button class="lock" onclick="locked('Making items in the Item Generator')">${esc(T("Make this item"))}</button></div>`;
+}
+
+// ------------------------------------------------------------------ check save
+$("checkGo").onclick = () => {
+  $("checkOut").innerHTML = `<div class="row"><div class="spin"></div> ${esc(T("Checking every item with the game's rules…"))}</div>`;
+  setTimeout(() => {
+    try{ const r = call("check_save");
+      let h = `<p style="color:var(--text)"><b>${esc(TF("Items checked with the game's own rules ({0}):", r.game_version))} <span class="ok">${esc(TF("{0} legit", r.ok))}</span>, <span class="${r.rows.length?"bad":"ok"}">${esc(TF("{0} to review", r.rows.length))}</span>.</b></p>
+        <p>${esc(TF("{0} regenerate exactly from their roll; {1} have no roll and pass the game's range rules.", r.by_roll, r.by_range))}</p>
+        <p class="small">${esc(T("UNREADABLE: the game drops this item when it loads the save. NOT LEGIT: the game shows a red \"Not legit\" border; worn, it keeps runs off the ladder."))}</p>`;
+      if(r.rows.length) h += `<div class="tablewrap"><table><tr><th>${esc(T("Result"))}</th><th>${esc(T("Where"))}</th><th>${esc(T("Item"))}</th><th>${esc(T("Why"))}</th></tr>${r.rows.map(x=>`<tr><td class="bad">${esc(T(x.kind))}</td><td>${esc(x.where)}</td><td>${esc(x.name)}</td><td>${esc(x.why)}</td></tr>`).join("")}</table></div>`;
+      if(r.builds) h += `<h3 style="margin-top:14px">${esc(T("Hero builds"))}</h3>` + (r.builds.length ? `<ul>${r.builds.map(b=>`<li class="bad">${esc(b.where)}: ${esc(b.why)}</li>`).join("")}</ul>` : `<p class="ok">${esc(T("All hero builds pass the game's build check."))}</p>`);
+      if(r.gold_over) h += `<p class="bad">${esc(TF("Gold is over the game's limit of {0}.", fmt(INFO.gold_cap)))}</p>`;
+      $("checkOut").innerHTML = h;
+    }catch(e){ $("checkOut").innerHTML = `<p class="bad">${esc(T(e.message))}</p>`; }
+  }, 30);
+};
+
+// ------------------------------------------------------------------ export
+function renderChanges(){
+  if(!SUM) return; const ch = call("changes");
+  $("changes").textContent = ch.length ? ch.map(T).join("\n") : T("No changes yet. Change the gold in Gold & Charsi first.");
+}
+$("resetBtn").onclick = async () => { if(await ask("Reset Changes","Discard every change and go back to the loaded save?")){ SUM = call("reset"); renderAll(); say("Changes discarded."); } };
+$("genBtn").onclick = async () => {
+  try{
+    const ch = call("changes");
+    if(!ch.length && !(await ask("No changes","Nothing was changed. Generate the save code anyway?"))) return;
+    const r = call("export");
+    if(r.builds.length && !(await ask("Hero build check", T("The game's build check rejects these hero builds (the game reports them and keeps the save off the leaderboard):") + "\n\n" + r.builds.slice(0,10).join("\n") + "\n\n" + T("Export anyway?")))) return;
+    if(r.unreadable.length && !(await ask("Items the game cannot read", T("The game will DROP these items when it loads the save:") + "\n\n" + r.unreadable.slice(0,10).join("\n") + "\n\n" + T("Export anyway?")))) return;
+    outCode = r.code; $("out").value = outCode; $("outWrap").classList.remove("hidden");
+    say("New save code generated. Copy it into the game's SAVES menu.");
+    const share = await ask("Share Generated Save?",
+      "Would you like to submit this generated save to our database to help improve D2 Survivors Save Editor?\n\nData to be submitted:\n• Full generated save code\n• Player nickname read from the save (the actual nickname will not be displayed)\n• Editor version\n• Submission date\n\nSubmission is optional. Choosing No will not affect your save.");
+    if(share){
+      try{
+        const res = await fetch(SUPABASE_FN, {method:"POST", headers:{"Content-Type":"application/json", apikey:SUPABASE_KEY, Authorization:"Bearer "+SUPABASE_KEY},
+          body: JSON.stringify({save_code: outCode, nickname: String(r.nickname||"").slice(0,100), editor_version: EDITOR_TAG})});
+        if(!res.ok) throw new Error(`HTTP ${res.status} ${(await res.text()).slice(0,200)}`);
+        await info("Save Submitted","Thank you! Your save has been submitted to the database.");
+      }catch(e){ await info("Save Submission Failed", T("Your save was generated and can still be used normally. Uploading it to the database failed.") + "\n\n" + TF("Details: {0}", e.message||e)); }
+    }
+  }catch(e){ const m = e.message; say(() => TF("Could not generate the save: {0}", T(m)), true); }
+};
+$("copyOut").onclick = async () => { try{ await navigator.clipboard.writeText(outCode); say("Copied. Paste it into the game's SAVES menu."); }catch(e){ $("out").select(); document.execCommand("copy"); say("Copied."); } };
+function download(name, text){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type:"text/plain"})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); }
+const stamp = () => new Date().toISOString().slice(0,16).replace(/[-:T]/g,"");
+$("saveOut").onclick = () => download(`d2s-save-edited-${stamp()}.txt`, outCode);
+$("saveOrig").onclick = () => origCode ? download(`d2s-save-original-${stamp()}.txt`, origCode) : info("Original","The save was loaded from a save.json file - keep that file as your original.");
+
+// ------------------------------------------------------------------ locked previews & help
+function lockPages(){
+  const card = (h, items) => `<div class="lockcard"><h2>${esc(T(h))} <span class="pill">${esc(T("full version"))}</span></h2><p>${esc(T("Preview of what the full editor does:"))}</p><ul>${items.map(i=>`<li>${esc(T(i))}</li>`).join("")}</ul>
+    <p>${esc(T("The full version is free on our Discord, together with updates, help and item requests."))}</p><a href="${DISCORD}" target="_blank" rel="noopener">${esc(T("GET THE FULL VERSION ON DISCORD"))}</a></div>`;
+  $("p-lock-gen").innerHTML = card("Item Generator", ["Unique, set, rare, magic and white items made exactly like the game makes them (they stay legit)",
+    "Pick the exact rolls you want; rares with up to 6 chosen affixes and an exact affix count", "COPY ITEM: copy any item to any hero's inventory, gear, mercenary or stash, exactly or with a new roll",
+    "DESIGN: pick the picture of rings, amulets and charms", "Re-roll items you own to the values you want",
+    "Put weapons and shields into either weapon set", "DEV GENERATION: unique or set items with up to 48 stats of your choice, values 1-1000 (Not legit, for testing builds offline)"]);
+  $("p-lock-rw").innerHTML = card("Runewords & Charms", ["Every runeword on every base it can drop on, with the rolls you want", "Runewords on class bases keep the base's own property, like in the game", "Small, Large and Grand charms with the prefix and suffix you want", "Grand Charms and skillers made the way the game makes them"]);
+  $("p-lock-skills").innerHTML = card("Skills", ["Change skill levels for every hero", "The game's own build check, so builds stay valid", "Search skills by tree, type and name"]);
+  $("p-lock-belt").innerHTML = card("Belt & Potions", ["Fill every belt slot with healing, mana or rejuvenation potions", "Set how many of each, within the game's limits"]);
+}
+function helpPage(){
+  const li = s => `<li>${T(s)}</li>`;          // help texts carry a little markup (<b>, <code>) in every language
+  $("p-help").innerHTML = `<h2>${esc(T("How to use the web editor"))}</h2>
+  <ol>
+    ${li('<b>Load your save.</b> In the game open <b>SAVES</b>, copy the code (starts with <code>D2S1:</code>), paste it at the top and click <b>Load Save Code</b>. Keep the original code somewhere safe.')}
+    ${li('<b>Pick a hero</b> in the bar above the tabs. Character &amp; Mercenary shows the level, skills and mercenary.')}
+    ${li('<b>Gold &amp; Charsi:</b> type a new amount and click <b>Apply Gold</b>, or use the quick buttons. The table shows every Charsi ware in your save: ranks, gold spent, the next price and the gold to max. "How much gold for…" tells you the exact price of any level.')}
+    ${li('<b>Items &amp; Modifiers / Stash:</b> click an item to see its tooltip like in the game, and whether the game sees it as legit. "Show every stat and its range" lists each stat with the range the game allows.')}
+    ${li('<b>Reference:</b> every unique, set item and runeword with its ranges. Search by name or by property ("faster cast").')}
+    ${li('<b>Check save:</b> runs the game\'s own checks on every item and hero build.')}
+    ${li('<b>Preview &amp; Export:</b> review the changes, click <b>Generate Save Code</b>, copy the new code and paste it into the game\'s <b>SAVES</b> menu.')}
+  </ol>
+  <h3>${esc(T("Language"))}</h3><p>${esc(T("Click the globe and flag in the top-right corner and pick English, Polski, Deutsch, Français, 한국어 or 简体中文. The page switches at once and remembers the choice. Item, skill and class names stay as the game shows them."))}</p>
+  <h3>${esc(T("Update notice"))}</h3><p>${esc(T("The badge at the top shows the newest stable version. The stable version with every feature is free on our Discord; click the badge to join."))}</p>
+  <h3>${esc(T("Your data"))}</h3><p>${T("Everything runs in your browser: your save is not uploaded anywhere. After every export the editor asks whether you want to share the save with the editor's database; nothing is sent unless you click <b>Yes</b>.")}</p>
+  <h3>${esc(T("Good to know"))}</h3><p>${esc(T("The editor is made for offline fun, not for the ladder: the game marks edited saves, and runs with them don't count towards leaderboards."))}</p>`;
+}
+
+let saved = "en"; try{ saved = localStorage.getItem("d2s_lang") || "en"; }catch(e){}
+setLang(saved, false);
+updateBadge();
+boot();
+</script>
+</body>
+</html>
