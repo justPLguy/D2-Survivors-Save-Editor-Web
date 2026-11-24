@@ -1,35 +1,32 @@
-# ⚠️ D2 Survivors Save Editor (Web demo) — OUTDATED
+<div align="center">
 
-**This repository is no longer updated.** This was the old GitHub Pages demo of the editor; it has been replaced by the full online editor.
+# ⚠️ This project is no longer maintained
 
-The D2 Survivors Save Editor now lives **online, in your browser**: the full editor, free, with nothing to download or install and no antivirus false alarms. Your save stays on your computer unless you choose to share it.
+## D2 Survivors Save Editor (web demo)
 
-## ▶ Use the current editor
+### The editor now lives online: 👉 [d2s-editor.justplguy.com](https://d2s-editor.justplguy.com/) 👈
 
-### **https://d2-survivors-save-editor.justplguy.workers.dev/**
+[![Open the editor](https://img.shields.io/badge/Open%20the%20editor-EF4444?style=for-the-badge)](https://d2s-editor.justplguy.com/)
 
-## 📜 Changelog and new versions
-
-Current changelogs and release notes are here: **https://github.com/justPLguy/D2-Survivors-Save-Editor-Changelog**
-
-You can also find them inside the editor under **Tools → Editor changelog**. The editor shows a badge when a newer version is live.
-
-## 💬 Help, updates and feedback
-
-Join our Discord: **https://discord.gg/nENzQxTh4**
-
-Questions, bug reports, ideas and release announcements all happen there.
-
-## ☕ Tip jar
-
-The editor is free and stays free. If you like the work, you can throw a coin at https://ko-fi.com/justplguy. Totally optional.
+</div>
 
 ---
 
-### Why is this repository outdated?
+This repository held the old **web demo**, a preview version with only part of the features.
 
-- The old downloads (EXE, Python scripts, the old web demo) are no longer maintained and do not match the current version of the game.
-- Old builds can **break your save** in newer game versions. Please don't use them.
-- Everything they did, and much more, is in the online editor: item creation with legit rolls, jewels with stat ranges, tempering and Hellforge, Check save, multi-threaded seed search and more.
+**Please use the online editor instead.** It is free and needs no download or install. It works on phone and desktop, comes in 6 languages and is always up to date with the newest game patch. It also has every feature this version had, plus much more.
 
-*D2 Survivors Save Editor by Just a Polish Guy. An unofficial fan tool, not affiliated with D2 Survivors or Blizzard Entertainment.*
+## Why the move?
+The demo is gone for good. The **full editor** is now online for everyone, free and with every feature. There is no demo and no paid or hidden version.
+
+## Where to go now
+- 🔴 **Editor:** https://d2s-editor.justplguy.com/
+- 📋 **Changelog & releases:** https://github.com/justPLguy/D2-Survivors-Save-Editor-Changelog/releases
+- 💬 **Discord (help & updates):** https://discord.gg/nENzQxTh4
+- 🏠 **More projects:** https://www.justplguy.com/
+
+This repository stays online only as an archive. It gets no updates and no support, and its files no longer match the current game.
+
+---
+
+<sub>D2 Survivors Save Editor is a free, unofficial fan tool. It is not affiliated with the creator of D2 Survivors or with Blizzard Entertainment. Diablo is a trademark of Blizzard Entertainment.</sub>
